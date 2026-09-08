@@ -1,0 +1,72 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 800" width="100%" height="100%">
+  <defs>
+    <linearGradient id="bgGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#0f172a" />
+      <stop offset="50%" stop-color="#1e293b" />
+      <stop offset="100%" stop-color="#090d16" />
+    </linearGradient>
+    <linearGradient id="indigoGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#6366f1" />
+      <stop offset="100%" stop-color="#4338ca" />
+    </linearGradient>
+    <linearGradient id="amberGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#fbbf24" />
+      <stop offset="100%" stop-color="#d97706" />
+    </linearGradient>
+    <linearGradient id="boxTop" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#3b82f6" />
+      <stop offset="100%" stop-color="#1d4ed8" />
+    </linearGradient>
+    <linearGradient id="boxLeft" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#1e40af" />
+      <stop offset="100%" stop-color="#172554" />
+    </linearGradient>
+    <linearGradient id="boxRight" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#2563eb" />
+      <stop offset="100%" stop-color="#1e3a8a" />
+    </linearGradient>
+    <filter id="glow" x="-20%" y="-20%" width="140%" height="140%">
+      <feGaussianBlur stdDeviation="30" result="blur" />
+      <feComposite in="SourceGraphic" in2="blur" operator="over" />
+    </filter>
+  </defs>
+
+  <!-- Background Canvas -->
+  <rect width="800" height="800" rx="32" fill="url(#bgGrad)" />
+
+  <!-- Background Decorative Grid Circles -->
+  <circle cx="400" cy="360" r="260" fill="none" stroke="#334155" stroke-width="1.5" stroke-dasharray="8 8" opacity="0.4" />
+  <circle cx="400" cy="360" r="180" fill="none" stroke="#475569" stroke-width="1.5" opacity="0.3" />
+
+  <!-- Ambient Glow Behind Box -->
+  <circle cx="400" cy="340" r="140" fill="#4f46e5" opacity="0.25" filter="url(#glow)" />
+
+  <!-- Isometric Package / Marketplace Box -->
+  <!-- Top Face -->
+  <polygon points="400,200 540,270 400,340 260,270" fill="url(#boxTop)" />
+  <!-- Left Face -->
+  <polygon points="260,270 400,340 400,490 260,420" fill="url(#boxLeft)" />
+  <!-- Right Face -->
+  <polygon points="400,340 540,270 540,420 400,490" fill="url(#boxRight)" />
+
+  <!-- Box Tape / Sealing Strip Accent -->
+  <polygon points="380,210 420,230 420,480 380,460" fill="url(#amberGrad)" opacity="0.9" />
+  <polygon points="260,270 300,290 440,220 400,200" fill="url(#amberGrad)" opacity="0.75" />
+
+  <!-- MarketSphere Floating Badge / Logo Icon Above Box -->
+  <circle cx="400" cy="180" r="32" fill="url(#indigoGrad)" stroke="#818cf8" stroke-width="3" filter="url(#glow)" />
+  <path d="M386 180 L414 180 M400 166 L400 194" stroke="#ffffff" stroke-width="4" stroke-linecap="round" />
+  <circle cx="400" cy="180" r="8" fill="#fbbf24" />
+
+  <!-- Subtle Shadow under Box -->
+  <ellipse cx="400" cy="530" rx="160" ry="24" fill="#000000" opacity="0.5" filter="url(#glow)" />
+
+  <!-- Branded Typography & Copy -->
+  <text x="400" y="600" text-anchor="middle" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif" font-weight="900" font-size="28" fill="#f8fafc" letter-spacing="4">
+    MARKETSPHERE
+  </text>
+  <text x="400" y="635" text-anchor="middle" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif" font-weight="600" font-size="15" fill="#94a3b8" letter-spacing="1.5">
+    OFFICIAL PRODUCT CATALOGUE
+  </text>
+  <rect x="340" y="660" width="120" height="3" rx="1.5" fill="url(#amberGrad)" />
+</svg>

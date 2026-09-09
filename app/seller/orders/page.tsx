@@ -81,7 +81,61 @@ export default function SellerOrdersPage() {
       </div>
 
       <div className="rounded-2xl border border-slate-200 bg-white overflow-hidden shadow-sm">
-        <div className="overflow-x-auto">
+        {/* Mobile Card List (visible on screens < md) */}
+        <div className="md:hidden divide-y divide-slate-100">
+          {orderItems.map((item) => (
+            <div key={item.id} className="p-4 space-y-3">
+              <div className="flex items-center justify-between">
+                <div>
+                  <span className="font-mono font-bold text-slate-900 block text-xs">
+                    #{item.order.orderNumber}
+                  </span>
+                  <span className="text-[10px] text-slate-400">{formatDate(item.createdAt)}</span>
+                </div>
+                <span
+                  className={`px-2.5 py-0.5 rounded-full text-[10px] font-bold ${
+                    item.sellerStatus === "DELIVERED"
+                      ? "bg-emerald-100 text-emerald-800"
+                      : item.sellerStatus === "SHIPPED"
+                      ? "bg-indigo-100 text-indigo-800"
+                      : "bg-amber-100 text-amber-800"
+                  }`}
+                >
+                  {item.sellerStatus}
+                </span>
+              </div>
+
+              <div className="flex items-center gap-3">
+                <div className="relative w-12 h-12 rounded-lg overflow-hidden bg-slate-50 border border-slate-200 shrink-0">
+                  <ProductImage src={item.product.images?.[0]?.url} alt={item.title} fill />
+                </div>
+                <div className="min-w-0 flex-1 text-xs">
+                  <p className="font-bold text-slate-900 truncate">{item.title}</p>
+                  <p className="text-[11px] text-slate-500">Qty: {item.quantity} · Payout: {formatPrice(item.subtotal)}</p>
+                  {item.trackingNumber && (
+                    <p className="text-[10px] text-slate-400 font-mono mt-0.5 truncate">Track: {item.trackingNumber}</p>
+                  )}
+                </div>
+              </div>
+
+              {item.sellerStatus !== "DELIVERED" && (
+                <Button
+                  size="sm"
+                  onClick={() => {
+                    setSelectedItem(item);
+                    setTrackingNumber(item.trackingNumber || `MS-EXP-${Math.floor(1000000 + Math.random() * 9000000)}`);
+                  }}
+                  className="w-full bg-indigo-600 hover:bg-indigo-700 text-white text-xs h-9 cursor-pointer"
+                >
+                  Update Status / Fulfill
+                </Button>
+              )}
+            </div>
+          ))}
+        </div>
+
+        {/* Desktop Table View (hidden on mobile) */}
+        <div className="hidden md:block overflow-x-auto">
           <table className="w-full text-left text-xs">
             <thead className="bg-slate-50 border-b border-slate-200 text-slate-500 font-bold uppercase">
               <tr>
@@ -95,62 +149,56 @@ export default function SellerOrdersPage() {
               </tr>
             </thead>
             <tbody className="divide-y divide-slate-100 font-medium">
-              {orderItems.map((item) => {
-                const imgUrl =
-                  item.product.images?.[0]?.url ||
-                  "https://images.unsplash.com/photo-1505740420928-5e560c06d30e?auto=format&fit=crop&w=600&q=80";
-
-                return (
-                  <tr key={item.id} className="hover:bg-slate-50/50">
-                    <td className="p-4">
-                      <span className="font-mono font-bold text-slate-900 block">
-                        #{item.order.orderNumber}
-                      </span>
-                      <span className="text-[11px] text-slate-400">{formatDate(item.createdAt)}</span>
-                    </td>
-                    <td className="p-4 flex items-center gap-3">
-                      <div className="relative w-10 h-10 rounded-lg overflow-hidden bg-slate-50 border border-slate-200 shrink-0">
-                        <ProductImage src={item.product.images?.[0]?.url} alt={item.title} fill />
-                      </div>
-                      <span className="font-bold text-slate-800 max-w-xs truncate block">{item.title}</span>
-                    </td>
-                    <td className="p-4">{item.quantity}</td>
-                    <td className="p-4 font-bold text-slate-900">{formatPrice(item.subtotal)}</td>
-                    <td className="p-4">
-                      <span
-                        className={`px-2.5 py-0.5 rounded-full text-[10px] font-bold ${
-                          item.sellerStatus === "DELIVERED"
-                            ? "bg-emerald-100 text-emerald-800"
-                            : item.sellerStatus === "SHIPPED"
-                            ? "bg-indigo-100 text-indigo-800"
-                            : "bg-amber-100 text-amber-800"
-                        }`}
-                      >
-                        {item.sellerStatus}
-                      </span>
-                    </td>
-                    <td className="p-4 font-mono text-[11px] text-slate-600">
-                      {item.trackingNumber || "—"}
-                    </td>
-                    <td className="p-4 text-right">
-                      <div className="flex items-center justify-end gap-2">
-                        {item.sellerStatus !== "DELIVERED" && (
-                          <Button
-                            size="sm"
-                            onClick={() => {
-                              setSelectedItem(item);
-                              setTrackingNumber(item.trackingNumber || `MS-EXP-${Math.floor(1000000 + Math.random() * 9000000)}`);
-                            }}
-                            className="bg-indigo-600 hover:bg-indigo-700 text-white text-[11px] h-8 px-3"
-                          >
-                            Update Status
-                          </Button>
-                        )}
-                      </div>
-                    </td>
-                  </tr>
-                );
-              })}
+              {orderItems.map((item) => (
+                <tr key={item.id} className="hover:bg-slate-50/50">
+                  <td className="p-4">
+                    <span className="font-mono font-bold text-slate-900 block">
+                      #{item.order.orderNumber}
+                    </span>
+                    <span className="text-[11px] text-slate-400">{formatDate(item.createdAt)}</span>
+                  </td>
+                  <td className="p-4 flex items-center gap-3">
+                    <div className="relative w-10 h-10 rounded-lg overflow-hidden bg-slate-50 border border-slate-200 shrink-0">
+                      <ProductImage src={item.product.images?.[0]?.url} alt={item.title} fill />
+                    </div>
+                    <span className="font-bold text-slate-800 max-w-xs truncate block">{item.title}</span>
+                  </td>
+                  <td className="p-4">{item.quantity}</td>
+                  <td className="p-4 font-bold text-slate-900">{formatPrice(item.subtotal)}</td>
+                  <td className="p-4">
+                    <span
+                      className={`px-2.5 py-0.5 rounded-full text-[10px] font-bold ${
+                        item.sellerStatus === "DELIVERED"
+                          ? "bg-emerald-100 text-emerald-800"
+                          : item.sellerStatus === "SHIPPED"
+                          ? "bg-indigo-100 text-indigo-800"
+                          : "bg-amber-100 text-amber-800"
+                      }`}
+                    >
+                      {item.sellerStatus}
+                    </span>
+                  </td>
+                  <td className="p-4 font-mono text-[11px] text-slate-600">
+                    {item.trackingNumber || "—"}
+                  </td>
+                  <td className="p-4 text-right">
+                    <div className="flex items-center justify-end gap-2">
+                      {item.sellerStatus !== "DELIVERED" && (
+                        <Button
+                          size="sm"
+                          onClick={() => {
+                            setSelectedItem(item);
+                            setTrackingNumber(item.trackingNumber || `MS-EXP-${Math.floor(1000000 + Math.random() * 9000000)}`);
+                          }}
+                          className="bg-indigo-600 hover:bg-indigo-700 text-white text-[11px] h-8 px-3"
+                        >
+                          Update Status
+                        </Button>
+                      )}
+                    </div>
+                  </td>
+                </tr>
+              ))}
             </tbody>
           </table>
         </div>

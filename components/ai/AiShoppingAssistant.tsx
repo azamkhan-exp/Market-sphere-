@@ -1,10 +1,10 @@
 "use client";
 
 import * as React from "react";
-import Image from "next/image";
 import Link from "next/link";
 import { Sparkles, X, Send, Bot, User, ShoppingCart, Check } from "lucide-react";
 import { formatPrice } from "@/lib/utils";
+import { ProductImage } from "@/components/ui/ProductImage";
 
 interface Message {
   role: "user" | "assistant";
@@ -99,16 +99,16 @@ export function AiShoppingAssistant() {
       {/* Floating Launcher Button */}
       <button
         onClick={() => setIsOpen(!isOpen)}
-        className="fixed bottom-6 right-6 z-40 p-3.5 rounded-full bg-gradient-to-r from-indigo-600 via-indigo-700 to-amber-500 text-white shadow-2xl hover:scale-105 active:scale-95 transition-all flex items-center gap-2 group cursor-pointer"
+        className="fixed bottom-20 md:bottom-6 right-4 sm:right-6 z-40 p-3 sm:p-3.5 rounded-full bg-gradient-to-r from-indigo-600 via-indigo-700 to-amber-500 text-white shadow-2xl hover:scale-105 active:scale-95 transition-all flex items-center gap-2 group cursor-pointer"
         aria-label="Open AI Shopping Assistant"
       >
-        <Sparkles className="w-6 h-6 animate-spin-slow" />
+        <Sparkles className="w-5 h-5 sm:w-6 sm:h-6 animate-spin-slow" />
         <span className="text-xs font-bold pr-1 hidden sm:inline-block">AI Shopping Assistant</span>
       </button>
 
       {/* Floating Chat Window */}
       {isOpen && (
-        <div className="fixed bottom-20 right-4 sm:right-6 w-[92vw] sm:w-[420px] h-[580px] max-h-[80vh] bg-white rounded-3xl shadow-2xl border border-slate-200 z-50 flex flex-col overflow-hidden animate-in zoom-in-95 duration-200">
+        <div className="fixed bottom-20 md:bottom-24 right-2 sm:right-6 w-[calc(100vw-1rem)] sm:w-[420px] max-w-[calc(100vw-1rem)] h-[580px] max-h-[80vh] bg-white rounded-2xl sm:rounded-3xl shadow-2xl border border-slate-200 z-50 flex flex-col overflow-hidden animate-in zoom-in-95 duration-200">
           {/* Header */}
           <div className="p-4 bg-slate-900 text-white flex items-center justify-between border-b border-slate-800">
             <div className="flex items-center gap-2.5">
@@ -124,7 +124,8 @@ export function AiShoppingAssistant() {
             </div>
             <button
               onClick={() => setIsOpen(false)}
-              className="p-1 rounded-full text-slate-400 hover:text-white hover:bg-slate-800"
+              aria-label="Close assistant"
+              className="p-2 rounded-xl text-slate-400 hover:text-white hover:bg-slate-800 transition-colors min-h-[40px] min-w-[40px] flex items-center justify-center cursor-pointer"
             >
               <X className="w-5 h-5" />
             </button>
@@ -158,7 +159,7 @@ export function AiShoppingAssistant() {
                           className="flex items-center gap-2 p-2 rounded-xl bg-slate-50 border border-slate-200 hover:bg-white transition-colors"
                         >
                           <div className="relative w-12 h-12 rounded-lg overflow-hidden bg-white shrink-0 border border-slate-100">
-                            <Image src={prod.image} alt={prod.title} fill className="object-cover" />
+                            <ProductImage src={prod.image} alt={prod.title} fill />
                           </div>
                           <div className="flex-1 min-w-0">
                             <Link

@@ -63,7 +63,48 @@ export default async function SellerInventoryPage() {
 
       {/* Stock Table */}
       <div className="rounded-2xl border border-slate-200 bg-white overflow-hidden shadow-sm">
-        <div className="overflow-x-auto">
+        {/* Mobile Card View (visible on screens < md) */}
+        <div className="md:hidden divide-y divide-slate-100">
+          {products.map((p) => {
+            const isLow = p.stockQuantity <= p.lowStockThreshold;
+            return (
+              <div key={p.id} className="p-4 space-y-2 text-xs">
+                <div className="flex items-center justify-between">
+                  <span className="font-mono text-[11px] text-slate-400">SKU: {p.sku}</span>
+                  {isLow ? (
+                    <span className="px-2 py-0.5 rounded-full bg-red-100 text-red-700 font-bold text-[10px] flex items-center gap-1">
+                      <AlertTriangle className="w-3 h-3" /> Low Stock
+                    </span>
+                  ) : (
+                    <span className="px-2 py-0.5 rounded-full bg-emerald-100 text-emerald-700 font-bold text-[10px] flex items-center gap-1">
+                      <CheckCircle2 className="w-3 h-3" /> Optimal
+                    </span>
+                  )}
+                </div>
+
+                <p className="font-bold text-slate-900 text-sm">{p.title}</p>
+
+                <div className="grid grid-cols-3 gap-2 pt-1 border-t border-slate-100 text-center">
+                  <div className="p-2 rounded-lg bg-slate-50">
+                    <p className="text-[10px] text-slate-400 uppercase font-bold">On Hand</p>
+                    <p className="font-black text-slate-900 text-sm mt-0.5">{p.stockQuantity}</p>
+                  </div>
+                  <div className="p-2 rounded-lg bg-slate-50">
+                    <p className="text-[10px] text-slate-400 uppercase font-bold">Reserved</p>
+                    <p className="font-bold text-slate-600 text-sm mt-0.5">{p.reservedQuantity}</p>
+                  </div>
+                  <div className="p-2 rounded-lg bg-slate-50">
+                    <p className="text-[10px] text-slate-400 uppercase font-bold">Alert Level</p>
+                    <p className="font-bold text-slate-600 text-sm mt-0.5">{p.lowStockThreshold}</p>
+                  </div>
+                </div>
+              </div>
+            );
+          })}
+        </div>
+
+        {/* Desktop Table View (hidden on mobile) */}
+        <div className="hidden md:block overflow-x-auto">
           <table className="w-full text-left text-xs">
             <thead className="bg-slate-50 border-b border-slate-200 text-slate-500 font-bold uppercase">
               <tr>

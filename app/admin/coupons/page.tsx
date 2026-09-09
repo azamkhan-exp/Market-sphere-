@@ -87,7 +87,45 @@ export default function AdminCouponsPage() {
       </div>
 
       <div className="rounded-2xl border border-slate-200 bg-white overflow-hidden shadow-sm">
-        <div className="overflow-x-auto">
+        {/* Mobile Card List (screens < md) */}
+        <div className="md:hidden divide-y divide-slate-100">
+          {coupons.map((c) => (
+            <div key={c.id} className="p-4 space-y-2.5">
+              <div className="flex items-center justify-between">
+                <span className="font-mono font-black text-sm text-indigo-700 bg-indigo-50 px-2.5 py-1 rounded-lg border border-indigo-100">
+                  {c.code}
+                </span>
+                <span
+                  className={`px-2 py-0.5 rounded-full text-[10px] font-bold ${
+                    c.isActive ? "bg-emerald-100 text-emerald-800" : "bg-slate-100 text-slate-600"
+                  }`}
+                >
+                  {c.isActive ? "Active" : "Disabled"}
+                </span>
+              </div>
+              {c.description && <p className="text-xs text-slate-600">{c.description}</p>}
+              <div className="bg-slate-50 rounded-xl p-3 grid grid-cols-3 gap-2 text-center text-xs">
+                <div>
+                  <span className="text-[10px] text-slate-400 block">Discount</span>
+                  <span className="font-bold text-slate-900">
+                    {c.discountType === "PERCENTAGE" ? `${c.discountValue}% OFF` : `$${c.discountValue.toFixed(2)}`}
+                  </span>
+                </div>
+                <div>
+                  <span className="text-[10px] text-slate-400 block">Min Spend</span>
+                  <span className="font-bold text-slate-900">${c.minOrderAmount.toFixed(2)}</span>
+                </div>
+                <div>
+                  <span className="text-[10px] text-slate-400 block">Used / Limit</span>
+                  <span className="font-bold text-slate-900">{c.timesUsed}/{c.usageLimit}</span>
+                </div>
+              </div>
+            </div>
+          ))}
+        </div>
+
+        {/* Desktop Table View (screens >= md) */}
+        <div className="hidden md:block overflow-x-auto">
           <table className="w-full text-left text-xs">
             <thead className="bg-slate-50 border-b border-slate-200 text-slate-500 font-bold uppercase">
               <tr>

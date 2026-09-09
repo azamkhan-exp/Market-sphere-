@@ -30,23 +30,24 @@ export function Modal({ isOpen, onClose, title, children, className }: ModalProp
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm animate-in fade-in duration-200">
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4 bg-black/60 backdrop-blur-sm animate-in fade-in duration-200">
       <div
         className={cn(
           "relative w-full max-w-lg bg-white rounded-2xl shadow-2xl overflow-hidden border border-slate-200 animate-in zoom-in-95 duration-200",
           className
         )}
       >
-        <div className="flex items-center justify-between p-5 border-b border-slate-100">
-          {title && <h3 className="text-lg font-semibold text-slate-900">{title}</h3>}
+        <div className="flex items-center justify-between p-4 sm:p-5 border-b border-slate-100">
+          {title && <h3 className="text-base sm:text-lg font-semibold text-slate-900">{title}</h3>}
           <button
             onClick={onClose}
-            className="p-1 rounded-full text-slate-400 hover:text-slate-600 hover:bg-slate-100 transition-colors"
+            aria-label="Close modal"
+            className="p-2 min-w-[40px] min-h-[40px] flex items-center justify-center rounded-xl text-slate-400 hover:text-slate-600 hover:bg-slate-100 transition-colors cursor-pointer"
           >
             <X className="w-5 h-5" />
           </button>
         </div>
-        <div className="p-6 max-h-[80vh] overflow-y-auto">{children}</div>
+        <div className="p-4 sm:p-6 max-h-[85vh] overflow-y-auto">{children}</div>
       </div>
     </div>
   );

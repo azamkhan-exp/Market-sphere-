@@ -197,7 +197,7 @@ export default function AdminDashboardPage() {
       {/* Charts & Analytics Row */}
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
         {/* GMV Volume Area Chart (8 cols) */}
-        <div className="lg:col-span-8 p-6 rounded-2xl border border-slate-200 bg-white shadow-sm space-y-4">
+        <div className="lg:col-span-8 p-4 sm:p-6 rounded-2xl border border-slate-200 bg-white shadow-sm space-y-4 min-w-0 overflow-hidden">
           <div className="flex items-center justify-between">
             <div>
               <h3 className="text-base font-bold text-slate-900">Platform GMV & Revenue Trend</h3>
@@ -205,7 +205,7 @@ export default function AdminDashboardPage() {
             </div>
           </div>
 
-          <div className="h-72 w-full pt-4">
+          <div className="h-72 w-full pt-4 min-w-0">
             <ResponsiveContainer width="100%" height="100%">
               <AreaChart data={chartData}>
                 <defs>
@@ -228,7 +228,7 @@ export default function AdminDashboardPage() {
         </div>
 
         {/* Top Categories Breakdown (4 cols) */}
-        <div className="lg:col-span-4 p-6 rounded-2xl border border-slate-200 bg-white shadow-sm space-y-4">
+        <div className="lg:col-span-4 p-4 sm:p-6 rounded-2xl border border-slate-200 bg-white shadow-sm space-y-4 min-w-0 overflow-hidden">
           <div className="flex items-center justify-between">
             <h3 className="text-base font-bold text-slate-900">Top Categories by Sales</h3>
             <span className="text-xs text-slate-400">Share</span>
@@ -265,7 +265,7 @@ export default function AdminDashboardPage() {
       {/* Top Products & Audit Logs Row */}
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
         {/* Top Platform SKUs (5 cols) */}
-        <div className="lg:col-span-5 p-6 rounded-2xl border border-slate-200 bg-white shadow-sm space-y-4">
+        <div className="lg:col-span-5 p-4 sm:p-6 rounded-2xl border border-slate-200 bg-white shadow-sm space-y-4 min-w-0 overflow-hidden">
           <h3 className="text-base font-bold text-slate-900">Marketplace Best Sellers</h3>
 
           <div className="divide-y divide-slate-100">
@@ -286,7 +286,7 @@ export default function AdminDashboardPage() {
         </div>
 
         {/* Audit Log Stream (7 cols) */}
-        <div className="lg:col-span-7 p-6 rounded-2xl border border-slate-200 bg-white shadow-sm space-y-4">
+        <div className="lg:col-span-7 p-4 sm:p-6 rounded-2xl border border-slate-200 bg-white shadow-sm space-y-4 min-w-0 overflow-hidden">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-2">
               <FileText className="w-4 h-4 text-indigo-600" />

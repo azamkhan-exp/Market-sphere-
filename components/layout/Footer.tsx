@@ -1,15 +1,15 @@
 import * as React from "react";
 import Link from "next/link";
-import { ShieldCheck, Truck, RotateCcw, Headphones, Lock } from "lucide-react";
+import { ShieldCheck, Truck, RotateCcw, Lock } from "lucide-react";
 
 export function Footer() {
   return (
-    <footer className="bg-slate-950 text-slate-400 border-t border-slate-800 mt-20">
+    <footer className="bg-slate-950 text-slate-400 border-t border-slate-800 mt-16 sm:mt-20">
       {/* Trust Badges Row */}
-      <div className="border-b border-slate-800/80 bg-slate-900/60 py-8">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 grid grid-cols-2 md:grid-cols-4 gap-6 text-center md:text-left">
-          <div className="flex items-center gap-3 justify-center md:justify-start">
-            <div className="p-2.5 rounded-xl bg-indigo-500/10 text-indigo-400">
+      <div className="border-b border-slate-800/80 bg-slate-900/60 py-6 sm:py-8">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4 sm:gap-6 text-center sm:text-left">
+          <div className="flex items-center gap-3 justify-center sm:justify-start">
+            <div className="p-2.5 rounded-xl bg-indigo-500/10 text-indigo-400 shrink-0">
               <Truck className="w-5 h-5" />
             </div>
             <div className="text-left">
@@ -18,8 +18,8 @@ export function Footer() {
             </div>
           </div>
 
-          <div className="flex items-center gap-3 justify-center md:justify-start">
-            <div className="p-2.5 rounded-xl bg-emerald-500/10 text-emerald-400">
+          <div className="flex items-center gap-3 justify-center sm:justify-start">
+            <div className="p-2.5 rounded-xl bg-emerald-500/10 text-emerald-400 shrink-0">
               <ShieldCheck className="w-5 h-5" />
             </div>
             <div className="text-left">
@@ -28,18 +28,18 @@ export function Footer() {
             </div>
           </div>
 
-          <div className="flex items-center gap-3 justify-center md:justify-start">
-            <div className="p-2.5 rounded-xl bg-amber-500/10 text-amber-400">
+          <div className="flex items-center gap-3 justify-center sm:justify-start">
+            <div className="p-2.5 rounded-xl bg-amber-500/10 text-amber-400 shrink-0">
               <RotateCcw className="w-5 h-5" />
             </div>
             <div className="text-left">
-              <h4 className="text-sm font-bold text-white">30-Day Hassle-Free Return</h4>
+              <h4 className="text-sm font-bold text-white">30-Day Easy Returns</h4>
               <p className="text-xs text-slate-400">Instant label printing</p>
             </div>
           </div>
 
-          <div className="flex items-center gap-3 justify-center md:justify-start">
-            <div className="p-2.5 rounded-xl bg-purple-500/10 text-purple-400">
+          <div className="flex items-center gap-3 justify-center sm:justify-start">
+            <div className="p-2.5 rounded-xl bg-purple-500/10 text-purple-400 shrink-0">
               <Lock className="w-5 h-5" />
             </div>
             <div className="text-left">
@@ -51,9 +51,9 @@ export function Footer() {
       </div>
 
       {/* Main Directory Links */}
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16 grid grid-cols-2 md:grid-cols-5 gap-8">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10 sm:py-16 grid grid-cols-1 sm:grid-cols-2 md:grid-cols-5 gap-8">
         {/* Brand Col */}
-        <div className="col-span-2 space-y-4">
+        <div className="sm:col-span-2 space-y-3 sm:space-y-4">
           <div className="flex items-center gap-2">
             <div className="w-8 h-8 rounded-lg bg-indigo-600 flex items-center justify-center text-white font-black text-sm">
               MS
@@ -70,33 +70,33 @@ export function Footer() {
 
         {/* Col 1 */}
         <div>
-          <h4 className="text-xs font-bold text-white uppercase tracking-wider mb-4">Shop & Explore</h4>
+          <h4 className="text-xs font-bold text-white uppercase tracking-wider mb-3 sm:mb-4">Shop & Explore</h4>
           <ul className="space-y-2 text-xs">
+            <li><Link href="/categories" className="hover:text-white transition-colors">All Categories</Link></li>
             <li><Link href="/search?category=electronics" className="hover:text-white transition-colors">Electronics & PCs</Link></li>
             <li><Link href="/search?category=home-living" className="hover:text-white transition-colors">Home & Living</Link></li>
             <li><Link href="/search?category=fashion" className="hover:text-white transition-colors">Fashion & Apparel</Link></li>
-            <li><Link href="/search?category=sports-fitness" className="hover:text-white transition-colors">Sports & Fitness</Link></li>
-            <li><Link href="/search?flashDeal=true" className="hover:text-white transition-colors">Flash Deals</Link></li>
+            <li><Link href="/search?flashDeal=true" className="hover:text-white text-red-400 font-semibold transition-colors">⚡ Flash Deals</Link></li>
           </ul>
         </div>
 
         {/* Col 2 */}
         <div>
-          <h4 className="text-xs font-bold text-white uppercase tracking-wider mb-4">Sell on MarketSphere</h4>
+          <h4 className="text-xs font-bold text-white uppercase tracking-wider mb-3 sm:mb-4">Sell on MarketSphere</h4>
           <ul className="space-y-2 text-xs">
             <li><Link href="/seller/register" className="hover:text-white transition-colors">Seller Registration</Link></li>
             <li><Link href="/seller/dashboard" className="hover:text-white transition-colors">Vendor Portal</Link></li>
             <li><Link href="/seller/register" className="hover:text-white transition-colors">Fee Schedule & Policies</Link></li>
-            <li><Link href="/seller/register" className="hover:text-white transition-colors">Fulfillment by MarketSphere</Link></li>
+            <li><Link href="/seller/analytics" className="hover:text-white transition-colors">Payout Analytics</Link></li>
           </ul>
         </div>
 
         {/* Col 3 */}
         <div>
-          <h4 className="text-xs font-bold text-white uppercase tracking-wider mb-4">Customer Care</h4>
+          <h4 className="text-xs font-bold text-white uppercase tracking-wider mb-3 sm:mb-4">Customer Care</h4>
           <ul className="space-y-2 text-xs">
             <li><Link href="/account/orders" className="hover:text-white transition-colors">Track Orders</Link></li>
-            <li><Link href="/account/addresses" className="hover:text-white transition-colors">Shipping Rates & Policies</Link></li>
+            <li><Link href="/wishlist" className="hover:text-white transition-colors">My Wishlist</Link></li>
             <li><Link href="/account" className="hover:text-white transition-colors">Returns & Replacements</Link></li>
             <li><Link href="/account" className="hover:text-white transition-colors">Help & FAQ</Link></li>
           </ul>

@@ -83,69 +83,126 @@ export default function AdminOrdersPage() {
         </div>
       </div>
 
-      {/* Orders Table */}
+      {/* Orders Container */}
       <div className="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden">
         {loading ? (
           <div className="p-12 text-center text-xs text-slate-500">Loading platform orders...</div>
         ) : filtered.length === 0 ? (
           <div className="p-12 text-center text-xs text-slate-500">No orders found matching criteria.</div>
         ) : (
-          <div className="overflow-x-auto">
-            <table className="w-full text-left text-xs">
-              <thead className="bg-slate-50 text-slate-500 font-semibold border-b border-slate-100 uppercase tracking-wider text-[10px]">
-                <tr>
-                  <th className="py-3 px-4">Order #</th>
-                  <th className="py-3 px-4">Customer</th>
-                  <th className="py-3 px-4">Items</th>
-                  <th className="py-3 px-4">Total</th>
-                  <th className="py-3 px-4">Status</th>
-                  <th className="py-3 px-4">Carrier & Tracking</th>
-                  <th className="py-3 px-4">Date</th>
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-slate-100">
-                {filtered.map((ord) => (
-                  <tr key={ord.id} className="hover:bg-slate-50/60 transition-colors">
-                    <td className="py-3 px-4 font-mono font-bold text-slate-900">
-                      {ord.orderNumber}
-                    </td>
-                    <td className="py-3 px-4">
-                      <p className="font-semibold text-slate-800">{ord.user?.name || "Alex Mercer"}</p>
-                      <span className="text-[10px] text-slate-400">{ord.user?.email || "customer@example.com"}</span>
-                    </td>
-                    <td className="py-3 px-4 text-slate-600">
-                      {ord.items?.length || 1} item(s)
-                    </td>
-                    <td className="py-3 px-4 font-bold text-slate-900">
-                      {formatPrice(ord.totalAmount || ord.total || 0)}
-                    </td>
-                    <td className="py-3 px-4">
-                      <span
-                        className={`px-2 py-0.5 rounded-full font-bold uppercase text-[9px] ${
-                          ord.status === "DELIVERED"
-                            ? "bg-emerald-50 text-emerald-700 border border-emerald-200"
-                            : ord.status === "SHIPPED"
-                            ? "bg-indigo-50 text-indigo-700 border border-indigo-200"
-                            : "bg-amber-50 text-amber-700 border border-amber-200"
-                        }`}
-                      >
-                        {ord.status}
+          <>
+            {/* Mobile Card List (screens < md) */}
+            <div className="md:hidden divide-y divide-slate-100">
+              {filtered.map((ord) => (
+                <div key={ord.id} className="p-4 space-y-3">
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <span className="font-mono font-bold text-slate-900 block text-xs">
+                        #{ord.orderNumber}
                       </span>
-                    </td>
-                    <td className="py-3 px-4">
-                      <p className="font-medium text-slate-700">{ord.shipment?.carrier || ord.carrier || "FedEx Ground"}</p>
-                      <span className="text-[10px] font-mono text-slate-400">
-                        {ord.shipment?.trackingNumber || ord.trackingNumber || "N/A"}
-                      </span>
-                    </td>
-                    <td className="py-3 px-4 text-slate-500 whitespace-nowrap">
-                      {formatDate(ord.createdAt)}
-                    </td>
+                      <span className="text-[10px] text-slate-400">{formatDate(ord.createdAt)}</span>
+                    </div>
+                    <span
+                      className={`px-2 py-0.5 rounded-full font-bold uppercase text-[9px] ${
+                        ord.status === "DELIVERED"
+                          ? "bg-emerald-50 text-emerald-700 border border-emerald-200"
+                          : ord.status === "SHIPPED"
+                          ? "bg-indigo-50 text-indigo-700 border border-indigo-200"
+                          : "bg-amber-50 text-amber-700 border border-amber-200"
+                      }`}
+                    >
+                      {ord.status}
+                    </span>
+                  </div>
+
+                  <div className="bg-slate-50 rounded-xl p-3 space-y-1.5 text-xs">
+                    <div className="flex justify-between items-center">
+                      <span className="text-slate-500 text-[11px]">Customer:</span>
+                      <span className="font-semibold text-slate-800 text-right">{ord.user?.name || "Alex Mercer"}</span>
+                    </div>
+                    <div className="flex justify-between items-center">
+                      <span className="text-slate-500 text-[11px]">Email:</span>
+                      <span className="text-[10px] text-slate-600 truncate max-w-[200px]">{ord.user?.email || "customer@example.com"}</span>
+                    </div>
+                    <div className="flex justify-between items-center">
+                      <span className="text-slate-500 text-[11px]">Items:</span>
+                      <span className="text-slate-700 font-medium">{ord.items?.length || 1} item(s)</span>
+                    </div>
+                    <div className="flex justify-between items-center">
+                      <span className="text-slate-500 text-[11px]">Total:</span>
+                      <span className="font-black text-slate-900">{formatPrice(ord.totalAmount || ord.total || 0)}</span>
+                    </div>
+                    {(ord.shipment?.trackingNumber || ord.trackingNumber) && (
+                      <div className="flex justify-between items-center pt-1 border-t border-slate-200/60">
+                        <span className="text-slate-500 text-[10px]">Carrier:</span>
+                        <span className="text-[10px] font-mono text-indigo-600">
+                          {ord.shipment?.carrier || ord.carrier || "FedEx"} - {ord.shipment?.trackingNumber || ord.trackingNumber}
+                        </span>
+                      </div>
+                    )}
+                  </div>
+                </div>
+              ))}
+            </div>
+
+            {/* Desktop Table View (screens >= md) */}
+            <div className="hidden md:block overflow-x-auto">
+              <table className="w-full text-left text-xs">
+                <thead className="bg-slate-50 text-slate-500 font-semibold border-b border-slate-100 uppercase tracking-wider text-[10px]">
+                  <tr>
+                    <th className="py-3 px-4">Order #</th>
+                    <th className="py-3 px-4">Customer</th>
+                    <th className="py-3 px-4">Items</th>
+                    <th className="py-3 px-4">Total</th>
+                    <th className="py-3 px-4">Status</th>
+                    <th className="py-3 px-4">Carrier & Tracking</th>
+                    <th className="py-3 px-4">Date</th>
                   </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
+                </thead>
+                <tbody className="divide-y divide-slate-100">
+                  {filtered.map((ord) => (
+                    <tr key={ord.id} className="hover:bg-slate-50/60 transition-colors">
+                      <td className="py-3 px-4 font-mono font-bold text-slate-900">
+                        {ord.orderNumber}
+                      </td>
+                      <td className="py-3 px-4">
+                        <p className="font-semibold text-slate-800">{ord.user?.name || "Alex Mercer"}</p>
+                        <span className="text-[10px] text-slate-400">{ord.user?.email || "customer@example.com"}</span>
+                      </td>
+                      <td className="py-3 px-4 text-slate-600">
+                        {ord.items?.length || 1} item(s)
+                      </td>
+                      <td className="py-3 px-4 font-bold text-slate-900">
+                        {formatPrice(ord.totalAmount || ord.total || 0)}
+                      </td>
+                      <td className="py-3 px-4">
+                        <span
+                          className={`px-2 py-0.5 rounded-full font-bold uppercase text-[9px] ${
+                            ord.status === "DELIVERED"
+                              ? "bg-emerald-50 text-emerald-700 border border-emerald-200"
+                              : ord.status === "SHIPPED"
+                              ? "bg-indigo-50 text-indigo-700 border border-indigo-200"
+                              : "bg-amber-50 text-amber-700 border border-amber-200"
+                          }`}
+                        >
+                          {ord.status}
+                        </span>
+                      </td>
+                      <td className="py-3 px-4">
+                        <p className="font-medium text-slate-700">{ord.shipment?.carrier || ord.carrier || "FedEx Ground"}</p>
+                        <span className="text-[10px] font-mono text-slate-400">
+                          {ord.shipment?.trackingNumber || ord.trackingNumber || "N/A"}
+                        </span>
+                      </td>
+                      <td className="py-3 px-4 text-slate-500 whitespace-nowrap">
+                        {formatDate(ord.createdAt)}
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          </>
         )}
       </div>
     </div>

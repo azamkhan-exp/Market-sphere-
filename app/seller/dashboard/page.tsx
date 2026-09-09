@@ -186,13 +186,13 @@ export default function SellerDashboardPage() {
       {/* Charts & Analytics Row */}
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
         {/* Revenue & Volume Chart (8 cols) */}
-        <div className="lg:col-span-8 p-6 rounded-2xl border border-slate-200 bg-white shadow-sm space-y-4">
-          <div className="flex items-center justify-between">
+        <div className="lg:col-span-8 p-4 sm:p-6 rounded-2xl border border-slate-200 bg-white shadow-sm space-y-4 min-w-0 overflow-hidden">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
             <div>
               <h3 className="text-base font-bold text-slate-900">Sales Trend & Volume</h3>
               <p className="text-xs text-slate-500">Monthly revenue and order activity</p>
             </div>
-            <div className="flex gap-1.5 p-1 bg-slate-100 rounded-xl text-xs font-semibold">
+            <div className="flex gap-1.5 p-1 bg-slate-100 rounded-xl text-xs font-semibold self-start sm:self-auto">
               <button
                 onClick={() => setChartView("revenue")}
                 className={`px-3 py-1 rounded-lg transition-colors cursor-pointer ${
@@ -212,7 +212,7 @@ export default function SellerDashboardPage() {
             </div>
           </div>
 
-          <div className="h-72 w-full pt-4">
+          <div className="h-72 w-full pt-4 min-w-0">
             <ResponsiveContainer width="100%" height="100%">
               {chartView === "revenue" ? (
                 <BarChart data={chartData}>
@@ -242,7 +242,7 @@ export default function SellerDashboardPage() {
         </div>
 
         {/* Top Selling SKUs (4 cols) */}
-        <div className="lg:col-span-4 p-6 rounded-2xl border border-slate-200 bg-white shadow-sm space-y-4">
+        <div className="lg:col-span-4 p-4 sm:p-6 rounded-2xl border border-slate-200 bg-white shadow-sm space-y-4 min-w-0 overflow-hidden">
           <div className="flex items-center justify-between">
             <h3 className="text-base font-bold text-slate-900">Top Performing SKUs</h3>
             <Link href="/seller/products" className="text-xs text-indigo-600 font-bold hover:underline">
@@ -276,7 +276,7 @@ export default function SellerDashboardPage() {
       {/* Low-Stock & Recent Orders Row */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         {/* Low-Stock Replenishment List */}
-        <div className="p-6 rounded-2xl border border-slate-200 bg-white shadow-sm space-y-4">
+        <div className="p-4 sm:p-6 rounded-2xl border border-slate-200 bg-white shadow-sm space-y-4 min-w-0 overflow-hidden">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-2">
               <AlertTriangle className="w-4 h-4 text-amber-500" />
@@ -310,7 +310,7 @@ export default function SellerDashboardPage() {
         </div>
 
         {/* Recent Customer Reviews */}
-        <div className="p-6 rounded-2xl border border-slate-200 bg-white shadow-sm space-y-4">
+        <div className="p-4 sm:p-6 rounded-2xl border border-slate-200 bg-white shadow-sm space-y-4 min-w-0 overflow-hidden">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-2">
               <Star className="w-4 h-4 text-amber-400 fill-amber-400" />

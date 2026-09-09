@@ -141,17 +141,17 @@ export default function CheckoutPage() {
 
   return (
     <div className="max-w-5xl mx-auto space-y-8 py-4">
-      {/* Checkout Progress Stepper */}
-      <div className="flex items-center justify-between max-w-xl mx-auto px-4">
+      {/* Checkout Steps Header */}
+      <div className="flex items-center justify-between max-w-xl mx-auto px-2 sm:px-4">
         {[
           { num: 1, label: "Shipping" },
           { num: 2, label: "Delivery" },
           { num: 3, label: "Review" },
           { num: 4, label: "Payment" },
         ].map((s) => (
-          <div key={s.num} className="flex flex-col items-center gap-1.5">
+          <div key={s.num} className="flex flex-col items-center gap-1 sm:gap-1.5">
             <div
-              className={`w-8 h-8 rounded-full flex items-center justify-center text-xs font-bold transition-all ${
+              className={`w-7 h-7 sm:w-8 sm:h-8 rounded-full flex items-center justify-center text-xs font-bold transition-all ${
                 step === s.num
                   ? "bg-indigo-600 text-white ring-4 ring-indigo-100"
                   : step > s.num
@@ -161,24 +161,24 @@ export default function CheckoutPage() {
             >
               {step > s.num ? "✓" : s.num}
             </div>
-            <span className="text-[11px] font-semibold text-slate-600">{s.label}</span>
+            <span className="text-[10px] sm:text-[11px] font-semibold text-slate-600">{s.label}</span>
           </div>
         ))}
       </div>
 
       {error && (
-        <div className="p-4 rounded-xl bg-red-50 border border-red-200 text-xs font-semibold text-red-700 flex items-center gap-2">
+        <div className="p-3.5 sm:p-4 rounded-xl bg-red-50 border border-red-200 text-xs font-semibold text-red-700 flex items-center gap-2">
           <AlertCircle className="w-4 h-4 shrink-0" />
           <span>{error}</span>
         </div>
       )}
 
-      <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
+      <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 sm:gap-8">
         {/* Main Steps Form (7 cols) */}
         <div className="lg:col-span-7 space-y-6">
           {/* STEP 1: Shipping Address */}
           {step === 1 && (
-            <div className="p-6 rounded-2xl border border-slate-200 bg-white space-y-4 shadow-sm">
+            <div className="p-4 sm:p-6 rounded-2xl border border-slate-200 bg-white space-y-4 shadow-sm">
               <h3 className="text-lg font-bold text-slate-900 flex items-center gap-2">
                 1. Shipping Address
               </h3>
@@ -272,7 +272,7 @@ export default function CheckoutPage() {
 
           {/* STEP 2: Delivery Method */}
           {step === 2 && (
-            <div className="p-6 rounded-2xl border border-slate-200 bg-white space-y-4 shadow-sm">
+            <div className="p-4 sm:p-6 rounded-2xl border border-slate-200 bg-white space-y-4 shadow-sm">
               <h3 className="text-lg font-bold text-slate-900">2. Delivery Speed</h3>
 
               <div className="space-y-3">
@@ -349,7 +349,7 @@ export default function CheckoutPage() {
 
           {/* STEP 3: Order Review & Gift Options */}
           {step === 3 && (
-            <div className="p-6 rounded-2xl border border-slate-200 bg-white space-y-4 shadow-sm">
+            <div className="p-4 sm:p-6 rounded-2xl border border-slate-200 bg-white space-y-4 shadow-sm">
               <h3 className="text-lg font-bold text-slate-900">3. Order Review & Preferences</h3>
 
               {/* Gift Options */}
@@ -400,7 +400,7 @@ export default function CheckoutPage() {
 
           {/* STEP 4: Payment Simulation / Stripe Elements */}
           {step === 4 && (
-            <div className="p-6 rounded-2xl border border-slate-200 bg-white space-y-5 shadow-sm">
+            <div className="p-4 sm:p-6 rounded-2xl border border-slate-200 bg-white space-y-5 shadow-sm">
               <div className="flex items-center justify-between pb-3 border-b border-slate-200">
                 <h3 className="text-lg font-bold text-slate-900 flex items-center gap-2">
                   <CreditCard className="w-5 h-5 text-indigo-600" /> 4. Payment
@@ -473,7 +473,7 @@ export default function CheckoutPage() {
 
         {/* Order Summary Sidebar (5 cols) */}
         <div className="lg:col-span-5 space-y-4">
-          <div className="p-6 rounded-2xl border border-slate-200 bg-slate-50/70 space-y-4">
+          <div className="p-4 sm:p-6 rounded-2xl border border-slate-200 bg-slate-50/70 space-y-4">
             <h4 className="text-sm font-bold text-slate-900">Review Items in Order</h4>
 
             <div className="divide-y divide-slate-200/60 max-h-80 overflow-y-auto pr-1">

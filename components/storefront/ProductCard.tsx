@@ -36,10 +36,6 @@ export function ProductCard({ product, onAddToCart }: ProductCardProps) {
     ? Math.round(((product.basePrice - product.salePrice!) / product.basePrice) * 100)
     : 0;
 
-  const imageUrl =
-    product.images?.[0]?.url ||
-    "https://images.unsplash.com/photo-1505740420928-5e560c06d30e?auto=format&fit=crop&w=600&q=80";
-
   const handleQuickAdd = async (e: React.MouseEvent) => {
     e.preventDefault();
     e.stopPropagation();
@@ -65,7 +61,7 @@ export function ProductCard({ product, onAddToCart }: ProductCardProps) {
   };
 
   return (
-    <div className="group relative flex flex-col justify-between bg-white border border-slate-200 rounded-2xl overflow-hidden hover:shadow-xl hover:border-indigo-100 transition-all duration-300">
+    <div className="group relative flex flex-col justify-between bg-white border border-slate-200 rounded-xl sm:rounded-2xl overflow-hidden hover:shadow-lg hover:border-indigo-100 transition-all duration-300">
       <div>
         {/* Image Container */}
         <Link href={`/products/${product.slug}`} className="block relative aspect-square overflow-hidden bg-slate-50">
@@ -73,83 +69,84 @@ export function ProductCard({ product, onAddToCart }: ProductCardProps) {
             src={product.images?.[0]?.url}
             alt={product.title}
             fill
-            className="group-hover:scale-105 transition-transform duration-500"
-            sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 25vw"
+            className="group-hover:scale-105 transition-transform duration-500 object-cover"
+            sizes="(max-width: 640px) 50vw, (max-width: 1024px) 33vw, 25vw"
           />
 
           {/* Badges */}
-          <div className="absolute top-3 left-3 flex flex-col gap-1 z-10">
+          <div className="absolute top-2 sm:top-3 left-2 sm:left-3 flex flex-col gap-1 z-10">
             {product.isFlashDeal && (
-              <Badge variant="destructive" className="bg-red-500 text-white shadow-sm font-semibold">
-                ⚡ Flash Deal
+              <Badge variant="destructive" className="bg-red-500 text-white shadow-sm font-semibold text-[9px] sm:text-[10px] px-1.5 py-0.5">
+                ⚡ Deal
               </Badge>
             )}
             {hasDiscount && (
-              <Badge variant="success" className="bg-emerald-600 text-white shadow-sm">
+              <Badge variant="success" className="bg-emerald-600 text-white shadow-sm text-[9px] sm:text-[10px] px-1.5 py-0.5">
                 -{discountPercent}%
               </Badge>
             )}
           </div>
 
-          {/* Wishlist Button */}
+          {/* Wishlist Button (touch-friendly) */}
           <button
             aria-label="Add to wishlist"
-            className="absolute top-3 right-3 p-2 rounded-full bg-white/90 text-slate-600 hover:text-red-500 hover:bg-white shadow-sm transition-colors"
+            className="absolute top-2 sm:top-3 right-2 sm:right-3 p-1.5 sm:p-2 rounded-full bg-white/90 text-slate-600 hover:text-red-500 hover:bg-white shadow-sm transition-colors min-w-[32px] min-h-[32px] sm:min-w-[36px] sm:min-h-[36px] flex items-center justify-center cursor-pointer"
             onClick={(e) => {
               e.preventDefault();
               e.stopPropagation();
-              // trigger wishlist event
               window.dispatchEvent(new CustomEvent("toast-message", { detail: "Saved to your Wishlist!" }));
             }}
           >
-            <Heart className="w-4 h-4" />
+            <Heart className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
           </button>
         </Link>
 
         {/* Content Details */}
-        <div className="p-4">
+        <div className="p-2.5 sm:p-4">
           {product.category && (
-            <span className="text-xs uppercase tracking-wider text-indigo-600 font-semibold mb-1 block">
+            <span className="text-[10px] sm:text-xs uppercase tracking-wider text-indigo-600 font-semibold mb-1 block truncate">
               {product.category.name}
             </span>
           )}
 
           <Link href={`/products/${product.slug}`}>
-            <h3 className="text-sm font-semibold text-slate-900 group-hover:text-indigo-600 transition-colors line-clamp-2 leading-snug">
+            <h3 className="text-xs sm:text-sm font-semibold text-slate-900 group-hover:text-indigo-600 transition-colors line-clamp-2 leading-snug">
               {product.title}
             </h3>
           </Link>
 
           {/* Rating */}
-          <div className="mt-2 flex items-center">
+          <div className="mt-1.5 sm:mt-2 flex items-center">
             <StarRating rating={product.avgRating} reviewCount={product.reviewCount} size="sm" />
           </div>
         </div>
       </div>
 
       {/* Price & Quick Add */}
-      <div className="p-4 pt-0 border-t border-slate-50 mt-2">
-        <div className="flex items-baseline justify-between mb-3 pt-2">
-          <div>
-            <span className="text-lg font-bold text-slate-900">{formatPrice(currentPrice)}</span>
+      <div className="p-2.5 sm:p-4 pt-0 border-t border-slate-50 mt-1 sm:mt-2">
+        <div className="flex flex-wrap items-baseline justify-between gap-1 mb-2 sm:mb-3 pt-1.5 sm:pt-2">
+          <div className="flex items-baseline gap-1.5 flex-wrap">
+            <span className="text-sm sm:text-base lg:text-lg font-bold text-slate-900">
+              {formatPrice(currentPrice)}
+            </span>
             {hasDiscount && (
-              <span className="ml-2 text-xs text-slate-400 line-through">
+              <span className="text-[10px] sm:text-xs text-slate-400 line-through">
                 {formatPrice(product.basePrice)}
               </span>
             )}
           </div>
           {product.stockQuantity <= 5 && product.stockQuantity > 0 && (
-            <span className="text-xs text-amber-600 font-medium">Only {product.stockQuantity} left!</span>
+            <span className="text-[10px] sm:text-xs text-amber-600 font-medium">Only {product.stockQuantity} left</span>
           )}
           {product.stockQuantity === 0 && (
-            <span className="text-xs text-red-500 font-medium">Out of Stock</span>
+            <span className="text-[10px] sm:text-xs text-red-500 font-medium">Out of Stock</span>
           )}
         </div>
 
         <button
           onClick={handleQuickAdd}
           disabled={product.stockQuantity === 0 || isAdding}
-          className={`w-full h-9 rounded-lg font-medium text-xs flex items-center justify-center gap-2 transition-all cursor-pointer ${
+          className={`w-full h-8 sm:h-9 rounded-lg font-medium text-[11px] sm:text-xs flex items-center justify-center gap-1.5 transition-all cursor-pointer ${
             isAdded
               ? "bg-emerald-600 text-white"
               : "bg-slate-900 text-white hover:bg-indigo-600 active:scale-95 disabled:bg-slate-200 disabled:text-slate-400 disabled:cursor-not-allowed"
@@ -157,11 +154,11 @@ export function ProductCard({ product, onAddToCart }: ProductCardProps) {
         >
           {isAdded ? (
             <>
-              <Check className="w-4 h-4" /> Added
+              <Check className="w-3.5 h-3.5" /> Added
             </>
           ) : (
             <>
-              <ShoppingCart className="w-3.5 h-3.5" /> Quick Add
+              <ShoppingCart className="w-3 h-3 sm:w-3.5 sm:h-3.5" /> Quick Add
             </>
           )}
         </button>

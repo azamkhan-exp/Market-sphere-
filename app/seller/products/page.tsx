@@ -43,7 +43,55 @@ export default async function SellerProductsPage() {
       </div>
 
       <div className="rounded-2xl border border-slate-200 bg-white overflow-hidden shadow-sm">
-        <div className="overflow-x-auto">
+        {/* Mobile Card View (visible on screens < md) */}
+        <div className="md:hidden divide-y divide-slate-100">
+          {products.map((p) => (
+            <div key={p.id} className="p-4 space-y-3">
+              <div className="flex items-center justify-between">
+                <span className="text-[11px] text-slate-500 font-mono">SKU: {p.sku}</span>
+                <span
+                  className={`px-2 py-0.5 rounded-full text-[10px] font-bold ${
+                    p.status === "ACTIVE"
+                      ? "bg-emerald-100 text-emerald-800"
+                      : "bg-amber-100 text-amber-800"
+                  }`}
+                >
+                  {p.status}
+                </span>
+              </div>
+
+              <div className="flex items-center gap-3">
+                <div className="relative w-14 h-14 rounded-xl overflow-hidden bg-slate-50 border border-slate-200 shrink-0">
+                  <ProductImage src={p.images[0]?.url} alt={p.title} fill />
+                </div>
+                <div className="min-w-0 flex-1 text-xs">
+                  <h4 className="font-bold text-slate-900 truncate">{p.title}</h4>
+                  <p className="text-[11px] text-indigo-600 font-semibold">{p.category?.name}</p>
+                  <div className="flex items-baseline gap-2 mt-1">
+                    <span className="font-bold text-slate-900">{formatPrice(p.salePrice ?? p.basePrice)}</span>
+                    <span
+                      className={`font-semibold ${
+                        p.stockQuantity <= 5 ? "text-red-600" : "text-slate-600"
+                      }`}
+                    >
+                      ({p.stockQuantity} in stock)
+                    </span>
+                  </div>
+                </div>
+              </div>
+
+              <Link
+                href={`/products/${p.slug}`}
+                className="block text-center py-2 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-800 font-bold text-xs"
+              >
+                View Live Listing &rarr;
+              </Link>
+            </div>
+          ))}
+        </div>
+
+        {/* Desktop Table View (hidden on mobile) */}
+        <div className="hidden md:block overflow-x-auto">
           <table className="w-full text-left text-xs">
             <thead className="bg-slate-50 border-b border-slate-200 text-slate-500 font-bold uppercase">
               <tr>
@@ -57,62 +105,56 @@ export default async function SellerProductsPage() {
               </tr>
             </thead>
             <tbody className="divide-y divide-slate-100 font-medium">
-              {products.map((p) => {
-                const imgUrl =
-                  p.images[0]?.url ||
-                  "https://images.unsplash.com/photo-1505740420928-5e560c06d30e?auto=format&fit=crop&w=600&q=80";
-
-                return (
-                  <tr key={p.id} className="hover:bg-slate-50/50">
-                    <td className="p-4 flex items-center gap-3">
-                      <div className="relative w-12 h-12 rounded-lg overflow-hidden bg-slate-50 border border-slate-200 shrink-0">
-                        <ProductImage src={p.images[0]?.url} alt={p.title} fill />
-                      </div>
-                      <span className="font-bold text-slate-900 max-w-xs truncate block">{p.title}</span>
-                    </td>
-                    <td className="p-4 font-mono text-slate-600">{p.sku}</td>
-                    <td className="p-4 text-slate-600">{p.category?.name}</td>
-                    <td className="p-4 font-bold text-slate-900">
-                      {formatPrice(p.salePrice ?? p.basePrice)}
-                      {p.salePrice && (
-                        <span className="text-[10px] text-slate-400 line-through block">
-                          {formatPrice(p.basePrice)}
-                        </span>
-                      )}
-                    </td>
-                    <td className="p-4">
-                      <span
-                        className={`font-bold ${
-                          p.stockQuantity <= 5 ? "text-red-600" : "text-slate-800"
-                        }`}
-                      >
-                        {p.stockQuantity} units
+              {products.map((p) => (
+                <tr key={p.id} className="hover:bg-slate-50/50">
+                  <td className="p-4 flex items-center gap-3">
+                    <div className="relative w-12 h-12 rounded-lg overflow-hidden bg-slate-50 border border-slate-200 shrink-0">
+                      <ProductImage src={p.images[0]?.url} alt={p.title} fill />
+                    </div>
+                    <span className="font-bold text-slate-900 max-w-xs truncate block">{p.title}</span>
+                  </td>
+                  <td className="p-4 font-mono text-slate-600">{p.sku}</td>
+                  <td className="p-4 text-slate-600">{p.category?.name}</td>
+                  <td className="p-4 font-bold text-slate-900">
+                    {formatPrice(p.salePrice ?? p.basePrice)}
+                    {p.salePrice && (
+                      <span className="text-[10px] text-slate-400 line-through block">
+                        {formatPrice(p.basePrice)}
                       </span>
-                    </td>
-                    <td className="p-4">
-                      <span
-                        className={`px-2 py-0.5 rounded-full text-[10px] font-bold ${
-                          p.status === "ACTIVE"
-                            ? "bg-emerald-100 text-emerald-800"
-                            : "bg-amber-100 text-amber-800"
-                        }`}
+                    )}
+                  </td>
+                  <td className="p-4">
+                    <span
+                      className={`font-bold ${
+                        p.stockQuantity <= 5 ? "text-red-600" : "text-slate-800"
+                      }`}
+                    >
+                      {p.stockQuantity} units
+                    </span>
+                  </td>
+                  <td className="p-4">
+                    <span
+                      className={`px-2 py-0.5 rounded-full text-[10px] font-bold ${
+                        p.status === "ACTIVE"
+                          ? "bg-emerald-100 text-emerald-800"
+                          : "bg-amber-100 text-amber-800"
+                      }`}
+                    >
+                      {p.status}
+                    </span>
+                  </td>
+                  <td className="p-4 text-right">
+                    <div className="flex items-center justify-end gap-2">
+                      <Link
+                        href={`/products/${p.slug}`}
+                        className="px-2.5 py-1 rounded bg-slate-100 hover:bg-slate-200 text-slate-700 font-semibold text-[11px]"
                       >
-                        {p.status}
-                      </span>
-                    </td>
-                    <td className="p-4 text-right">
-                      <div className="flex items-center justify-end gap-2">
-                        <Link
-                          href={`/products/${p.slug}`}
-                          className="px-2.5 py-1 rounded bg-slate-100 hover:bg-slate-200 text-slate-700 font-semibold text-[11px]"
-                        >
-                          View
-                        </Link>
-                      </div>
-                    </td>
-                  </tr>
-                );
-              })}
+                        View
+                      </Link>
+                    </div>
+                  </td>
+                </tr>
+              ))}
             </tbody>
           </table>
         </div>

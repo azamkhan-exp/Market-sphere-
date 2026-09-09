@@ -1,6 +1,7 @@
 import { ProductService } from "@/services/productService";
 import { db } from "@/lib/db";
 import { ProductCard } from "@/components/storefront/ProductCard";
+import { SearchMobileControls } from "@/components/search/SearchMobileControls";
 import Link from "next/link";
 import { SlidersHorizontal, ArrowUpDown } from "lucide-react";
 
@@ -56,12 +57,17 @@ export default async function SearchPage({ searchParams }: SearchPageProps) {
     db.brand.findMany({ select: { id: true, name: true, slug: true } }),
   ]);
 
+  const cleanParamsRecord: Record<string, string> = {};
+  Object.entries(params).forEach(([k, v]) => {
+    if (v !== undefined) cleanParamsRecord[k] = v;
+  });
+
   return (
     <div className="space-y-6">
       {/* Header Bar */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-4 border-b border-slate-200">
         <div>
-          <h1 className="text-2xl font-black text-slate-900 tracking-tight">
+          <h1 className="text-xl sm:text-2xl font-black text-slate-900 tracking-tight">
             {query ? `Search results for "${query}"` : categorySlug ? `Category: ${categorySlug}` : "All Marketplace Products"}
           </h1>
           <p className="text-xs text-slate-500 mt-0.5">
@@ -69,8 +75,8 @@ export default async function SearchPage({ searchParams }: SearchPageProps) {
           </p>
         </div>
 
-        {/* Sort Select */}
-        <div className="flex items-center gap-2">
+        {/* Desktop Sort Select */}
+        <div className="hidden md:flex items-center gap-2">
           <ArrowUpDown className="w-4 h-4 text-slate-400" />
           <span className="text-xs font-semibold text-slate-600">Sort by:</span>
           <div className="flex gap-1 text-xs">
@@ -102,10 +108,17 @@ export default async function SearchPage({ searchParams }: SearchPageProps) {
         </div>
       </div>
 
-      {/* Main Grid with Sidebar Filter */}
+      {/* Mobile Filter & Sort Controls */}
+      <SearchMobileControls
+        categories={categories}
+        currentParams={cleanParamsRecord}
+        totalProducts={pagination.total}
+      />
+
+      {/* Main Grid with Desktop Sidebar Filter */}
       <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
-        {/* Sidebar Filters */}
-        <aside className="space-y-6">
+        {/* Desktop Sidebar Filters (hidden on mobile) */}
+        <aside className="hidden md:block space-y-6">
           <div className="p-5 rounded-2xl border border-slate-200 bg-slate-50/50 space-y-6">
             <div className="flex items-center justify-between pb-3 border-b border-slate-200">
               <span className="text-sm font-bold text-slate-900 flex items-center gap-1.5">
@@ -141,57 +154,43 @@ export default async function SearchPage({ searchParams }: SearchPageProps) {
               </ul>
             </div>
 
-            {/* Price Ranges */}
+            {/* Price Filter */}
             <div className="border-t border-slate-200 pt-4">
-              <h4 className="text-xs font-bold text-slate-900 uppercase tracking-wider mb-2.5">Price</h4>
-              <div className="space-y-1.5 text-xs">
-                <Link
-                  href={`/search?${new URLSearchParams({ ...params, minPrice: "", maxPrice: "50" }).toString()}`}
-                  className="block py-1 px-2 rounded-md text-slate-600 hover:bg-slate-100"
-                >
-                  Under $50
-                </Link>
-                <Link
-                  href={`/search?${new URLSearchParams({ ...params, minPrice: "50", maxPrice: "200" }).toString()}`}
-                  className="block py-1 px-2 rounded-md text-slate-600 hover:bg-slate-100"
-                >
-                  $50 to $200
-                </Link>
-                <Link
-                  href={`/search?${new URLSearchParams({ ...params, minPrice: "200", maxPrice: "500" }).toString()}`}
-                  className="block py-1 px-2 rounded-md text-slate-600 hover:bg-slate-100"
-                >
-                  $200 to $500
-                </Link>
-                <Link
-                  href={`/search?${new URLSearchParams({ ...params, minPrice: "500", maxPrice: "" }).toString()}`}
-                  className="block py-1 px-2 rounded-md text-slate-600 hover:bg-slate-100"
-                >
-                  $500 & Above
-                </Link>
+              <h4 className="text-xs font-bold text-slate-900 uppercase tracking-wider mb-2.5">Price Range</h4>
+              <div className="flex items-center gap-2 text-xs">
+                <input
+                  type="number"
+                  placeholder="Min"
+                  defaultValue={minPrice || ""}
+                  className="w-full px-2 py-1 rounded-md border border-slate-300 bg-white"
+                />
+                <span>-</span>
+                <input
+                  type="number"
+                  placeholder="Max"
+                  defaultValue={maxPrice || ""}
+                  className="w-full px-2 py-1 rounded-md border border-slate-300 bg-white"
+                />
               </div>
             </div>
 
-            {/* Rating Filter */}
+            {/* Customer Rating Filter */}
             <div className="border-t border-slate-200 pt-4">
               <h4 className="text-xs font-bold text-slate-900 uppercase tracking-wider mb-2.5">Customer Rating</h4>
-              <div className="space-y-1.5 text-xs">
-                <Link
-                  href={`/search?${new URLSearchParams({ ...params, rating: "4.5" }).toString()}`}
-                  className="block py-1 px-2 rounded-md text-slate-600 hover:bg-slate-100"
-                >
-                  ⭐ 4.5 Stars & Up
-                </Link>
-                <Link
-                  href={`/search?${new URLSearchParams({ ...params, rating: "4.0" }).toString()}`}
-                  className="block py-1 px-2 rounded-md text-slate-600 hover:bg-slate-100"
-                >
-                  ⭐ 4.0 Stars & Up
-                </Link>
+              <div className="space-y-1 text-xs">
+                {[4, 3, 2, 1].map((r) => (
+                  <Link
+                    key={r}
+                    href={`/search?${new URLSearchParams({ ...params, rating: String(r) }).toString()}`}
+                    className={`block py-1 px-2 rounded-md ${minRating === r ? "bg-amber-100 text-amber-900 font-bold" : "text-slate-600 hover:bg-slate-100"}`}
+                  >
+                    {r} Stars & Up
+                  </Link>
+                ))}
               </div>
             </div>
 
-            {/* Availability */}
+            {/* Availability Filter */}
             <div className="border-t border-slate-200 pt-4">
               <h4 className="text-xs font-bold text-slate-900 uppercase tracking-wider mb-2.5">Availability</h4>
               <div className="space-y-1.5 text-xs">
@@ -212,10 +211,10 @@ export default async function SearchPage({ searchParams }: SearchPageProps) {
           </div>
         </aside>
 
-        {/* Product Results Grid */}
+        {/* Product Results Grid (3 cols on desktop, 2 cols on mobile) */}
         <main className="md:col-span-3">
           {products.length === 0 ? (
-            <div className="p-12 text-center rounded-3xl border border-dashed border-slate-300 bg-slate-50">
+            <div className="p-8 sm:p-12 text-center rounded-3xl border border-dashed border-slate-300 bg-slate-50">
               <p className="text-base font-bold text-slate-700">No products matched your criteria</p>
               <p className="text-xs text-slate-500 mt-1">Try adjusting your filters or search keywords</p>
               <Link
@@ -226,7 +225,7 @@ export default async function SearchPage({ searchParams }: SearchPageProps) {
               </Link>
             </div>
           ) : (
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+            <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-3 gap-2.5 sm:gap-6">
               {products.map((product) => (
                 <ProductCard key={product.id} product={product} />
               ))}
@@ -235,7 +234,7 @@ export default async function SearchPage({ searchParams }: SearchPageProps) {
 
           {/* Pagination */}
           {pagination.totalPages > 1 && (
-            <div className="flex justify-center items-center gap-2 mt-12">
+            <div className="flex justify-center items-center gap-1.5 sm:gap-2 mt-8 sm:mt-12 flex-wrap">
               {Array.from({ length: pagination.totalPages }).map((_, i) => {
                 const pageNum = i + 1;
                 const isCurrent = pageNum === pagination.page;
@@ -243,7 +242,7 @@ export default async function SearchPage({ searchParams }: SearchPageProps) {
                   <Link
                     key={pageNum}
                     href={`/search?${new URLSearchParams({ ...params, page: String(pageNum) }).toString()}`}
-                    className={`w-9 h-9 rounded-lg flex items-center justify-center text-xs font-semibold ${
+                    className={`w-8 h-8 sm:w-9 sm:h-9 rounded-lg flex items-center justify-center text-xs font-semibold ${
                       isCurrent
                         ? "bg-indigo-600 text-white shadow-sm"
                         : "border border-slate-200 text-slate-700 hover:bg-slate-50"

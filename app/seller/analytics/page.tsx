@@ -145,12 +145,12 @@ export default function SellerAnalyticsPage() {
       </div>
 
       {/* Sales Trend Chart */}
-      <div className="p-6 rounded-2xl border border-slate-200 bg-white space-y-4 shadow-sm">
+      <div className="p-4 sm:p-6 rounded-2xl border border-slate-200 bg-white space-y-4 shadow-sm min-w-0 overflow-hidden">
         <div className="flex items-center justify-between">
           <h3 className="text-sm font-bold text-slate-900">Monthly Revenue & Volume Progression</h3>
           <span className="text-xs text-slate-400">Past 6 Months</span>
         </div>
-        <div className="h-72 w-full">
+        <div className="h-72 w-full min-w-0">
           <ResponsiveContainer width="100%" height="100%">
             <BarChart data={salesData}>
               <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#f1f5f9" />

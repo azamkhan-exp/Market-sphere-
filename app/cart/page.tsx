@@ -142,65 +142,65 @@ export default function CartPage() {
         </p>
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
+      <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 sm:gap-8">
         {/* Left: Cart Items (8 cols) */}
         <div className="lg:col-span-8 space-y-4">
-          <div className="rounded-2xl border border-slate-200 bg-white overflow-hidden divide-y divide-slate-100">
+          <div className="rounded-2xl border border-slate-200 bg-white overflow-hidden divide-y divide-slate-100 shadow-sm">
             {cart.items.map((item: any) => {
               const currentPrice = item.variant?.price ?? item.product.salePrice ?? item.product.basePrice;
-              const imageUrl =
-                item.product.images?.[0]?.url ||
-                "https://images.unsplash.com/photo-1505740420928-5e560c06d30e?auto=format&fit=crop&w=600&q=80";
 
               return (
-                <div key={item.id} className="p-5 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+                <div key={item.id} className="p-3.5 sm:p-5 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 sm:gap-4">
                   {/* Image & Title */}
-                  <div className="flex items-center gap-4">
-                    <div className="relative w-20 h-20 rounded-xl overflow-hidden bg-slate-50 shrink-0 border border-slate-200">
+                  <div className="flex items-center gap-3 sm:gap-4 min-w-0 flex-1">
+                    <div className="relative w-16 h-16 sm:w-20 sm:h-20 rounded-xl overflow-hidden bg-slate-50 shrink-0 border border-slate-200">
                       <ProductImage src={item.product.images?.[0]?.url} alt={item.product.title} fill />
                     </div>
-                    <div>
+                    <div className="min-w-0 flex-1">
                       <Link
                         href={`/products/${item.product.slug}`}
-                        className="font-bold text-sm text-slate-900 hover:text-indigo-600 transition-colors line-clamp-1"
+                        className="font-bold text-xs sm:text-sm text-slate-900 hover:text-indigo-600 transition-colors line-clamp-1"
                       >
                         {item.product.title}
                       </Link>
                       {item.variant && (
-                        <p className="text-xs text-slate-500 mt-0.5">Option: {item.variant.name}</p>
+                        <p className="text-[11px] sm:text-xs text-slate-500 mt-0.5 truncate">Option: {item.variant.name}</p>
                       )}
                       <p className="text-xs font-bold text-slate-900 mt-1">{formatPrice(currentPrice)}</p>
                     </div>
                   </div>
 
                   {/* Quantity & Actions */}
-                  <div className="flex items-center justify-between w-full sm:w-auto gap-6">
+                  <div className="flex items-center justify-between w-full sm:w-auto gap-4 sm:gap-6 pt-2 sm:pt-0 border-t sm:border-t-0 border-slate-100">
                     {/* Counter */}
                     <div className="flex items-center border border-slate-300 rounded-lg bg-white">
                       <button
                         onClick={() => handleUpdateQty(item.id, item.quantity - 1)}
-                        className="px-2.5 py-1 text-slate-600 hover:bg-slate-100 rounded-l-lg text-xs font-bold"
+                        className="w-8 h-8 flex items-center justify-center text-slate-600 hover:bg-slate-100 rounded-l-lg text-xs font-bold cursor-pointer"
+                        aria-label="Decrease quantity"
                       >
                         -
                       </button>
-                      <span className="px-3 py-1 text-xs font-bold text-slate-900">{item.quantity}</span>
+                      <span className="px-3 py-1 text-xs font-bold text-slate-900 min-w-[28px] text-center">{item.quantity}</span>
                       <button
                         onClick={() => handleUpdateQty(item.id, item.quantity + 1)}
-                        className="px-2.5 py-1 text-slate-600 hover:bg-slate-100 rounded-r-lg text-xs font-bold"
+                        className="w-8 h-8 flex items-center justify-center text-slate-600 hover:bg-slate-100 rounded-r-lg text-xs font-bold cursor-pointer"
+                        aria-label="Increase quantity"
                       >
                         +
                       </button>
                     </div>
 
                     {/* Subtotal & Delete */}
-                    <span className="text-sm font-extrabold text-slate-900 min-w-[70px] text-right">
+                    <span className="text-xs sm:text-sm font-extrabold text-slate-900 text-right shrink-0">
                       {formatPrice(currentPrice * item.quantity)}
                     </span>
 
                     <button
                       onClick={() => handleRemoveItem(item.id)}
-                      className="p-1.5 text-slate-400 hover:text-red-600 transition-colors"
+                      className="p-2 rounded-lg text-slate-400 hover:text-red-600 hover:bg-red-50 transition-colors cursor-pointer min-w-[36px] min-h-[36px] flex items-center justify-center"
                       title="Remove item"
+                      aria-label="Remove item"
                     >
                       <Trash2 className="w-4 h-4" />
                     </button>
@@ -219,7 +219,7 @@ export default function CartPage() {
 
         {/* Right: Order Summary & Coupon (4 cols) */}
         <div className="lg:col-span-4 space-y-6">
-          <div className="p-6 rounded-2xl border border-slate-200 bg-slate-50 space-y-4 shadow-sm">
+          <div className="p-4 sm:p-6 rounded-2xl border border-slate-200 bg-slate-50 space-y-4 shadow-sm">
             <h3 className="text-base font-bold text-slate-900 pb-2 border-b border-slate-200">
               Order Summary
             </h3>

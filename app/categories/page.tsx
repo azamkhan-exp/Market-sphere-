@@ -34,17 +34,17 @@ export default async function CategoriesPage() {
   const categories = await CategoryRepository.getAll();
 
   return (
-    <div className="max-w-7xl mx-auto py-8 px-4 sm:px-6 lg:px-8 space-y-10">
+    <div className="space-y-8">
       {/* Page Header */}
-      <div className="border-b border-slate-200 pb-6">
-        <h1 className="text-3xl font-black text-slate-900 tracking-tight">Explore All Categories</h1>
-        <p className="text-sm text-slate-500 mt-1">
+      <div className="border-b border-slate-200 pb-4 sm:pb-6">
+        <h1 className="text-2xl sm:text-3xl font-black text-slate-900 tracking-tight">Explore All Categories</h1>
+        <p className="text-xs sm:text-sm text-slate-500 mt-1">
           Discover verified products from premier independent merchants and authorized brands.
         </p>
       </div>
 
       {/* Category Grid */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
+      <div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3 sm:gap-6">
         {categories.map((category) => {
           const IconComponent = (category.icon && iconMap[category.icon]) || Package;
 

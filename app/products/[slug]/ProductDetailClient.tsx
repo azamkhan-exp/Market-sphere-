@@ -210,23 +210,23 @@ export function ProductDetailClient({
   }
 
   return (
-    <div className="space-y-12">
+    <div className="space-y-8 sm:space-y-12 pb-20 md:pb-0">
       {/* Breadcrumb Navigation */}
-      <nav className="text-xs text-slate-500 flex items-center gap-2">
-        <Link href="/" className="hover:text-indigo-600">Home</Link>
+      <nav className="text-xs text-slate-500 flex items-center gap-2 overflow-x-auto whitespace-nowrap">
+        <Link href="/" className="hover:text-indigo-600 shrink-0">Home</Link>
         <span>/</span>
-        <Link href={`/search?category=${product.category?.slug}`} className="hover:text-indigo-600">
+        <Link href={`/search?category=${product.category?.slug}`} className="hover:text-indigo-600 shrink-0">
           {product.category?.name}
         </Link>
         <span>/</span>
-        <span className="text-slate-800 font-semibold truncate max-w-sm">{product.title}</span>
+        <span className="text-slate-800 font-semibold truncate max-w-[180px] sm:max-w-sm">{product.title}</span>
       </nav>
 
       {/* Main Product Layout */}
-      <div className="grid grid-cols-1 lg:grid-cols-12 gap-10">
-        {/* Left: Gallery (5 cols) */}
-        <div className="lg:col-span-6 space-y-4">
-          <div className="relative aspect-square rounded-3xl overflow-hidden bg-slate-50 border border-slate-200 shadow-sm">
+      <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 sm:gap-10">
+        {/* Left: Gallery (6 cols) */}
+        <div className="lg:col-span-6 space-y-3 sm:space-y-4">
+          <div className="relative aspect-square rounded-2xl sm:rounded-3xl overflow-hidden bg-slate-50 border border-slate-200 shadow-sm">
             <ProductImage
               src={selectedImage}
               alt={product.title}
@@ -238,12 +238,12 @@ export function ProductDetailClient({
 
           {/* Thumbnails */}
           {product.images && product.images.length > 1 && (
-            <div className="flex gap-3 overflow-x-auto pb-2">
+            <div className="flex gap-2 sm:gap-3 overflow-x-auto pb-2">
               {product.images.map((img: any) => (
                 <button
                   key={img.id}
                   onClick={() => setSelectedImage(img.url)}
-                  className={`relative w-20 h-20 rounded-xl overflow-hidden border-2 shrink-0 transition-all ${
+                  className={`relative w-14 h-14 sm:w-20 sm:h-20 rounded-xl overflow-hidden border-2 shrink-0 transition-all cursor-pointer ${
                     selectedImage === img.url ? "border-indigo-600 shadow-md" : "border-slate-200 opacity-70 hover:opacity-100"
                   }`}
                 >
@@ -481,9 +481,9 @@ export function ProductDetailClient({
           {Object.keys(specs).length > 0 ? (
             <div className="rounded-2xl border border-slate-200 overflow-hidden divide-y divide-slate-100 text-xs">
               {Object.entries(specs).map(([key, val]) => (
-                <div key={key} className="grid grid-cols-2 p-3 bg-white even:bg-slate-50">
+                <div key={key} className="flex flex-col sm:flex-row sm:items-center justify-between p-2.5 sm:p-3 bg-white even:bg-slate-50 text-xs gap-1">
                   <span className="font-semibold text-slate-600">{key}</span>
-                  <span className="text-slate-900 font-mono">{val}</span>
+                  <span className="text-slate-900 font-mono break-all">{val}</span>
                 </div>
               ))}
             </div>
@@ -594,13 +594,57 @@ export function ProductDetailClient({
       {relatedProducts && relatedProducts.length > 0 && (
         <div className="border-t border-slate-200 pt-10 space-y-6">
           <h2 className="text-xl font-bold text-slate-900">Similar Products You Might Like</h2>
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+          <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-4 gap-2.5 sm:gap-6">
             {relatedProducts.map((p) => (
               <ProductCard key={p.id} product={p} />
             ))}
           </div>
         </div>
       )}
+
+      {/* Mobile Sticky Bottom Action Bar */}
+      <div className="md:hidden fixed bottom-0 left-0 right-0 z-30 bg-white/95 backdrop-blur-md border-t border-slate-200 px-4 py-2.5 shadow-lg flex items-center justify-between gap-3">
+        <div className="min-w-0 flex-1">
+          <p className="text-[11px] text-slate-500 truncate">{product.title}</p>
+          <div className="flex items-baseline gap-1.5">
+            <span className="text-sm font-extrabold text-slate-900">{formatPrice(currentPrice)}</span>
+            {originalPrice && originalPrice > currentPrice && (
+              <span className="text-[10px] text-slate-400 line-through">{formatPrice(originalPrice)}</span>
+            )}
+          </div>
+        </div>
+
+        {isOutOfStock ? (
+          <Button
+            onClick={handleStockAlert}
+            disabled={stockAlertSubmitting || stockAlertSuccess}
+            size="sm"
+            className="bg-amber-500 hover:bg-amber-600 text-slate-950 font-bold text-xs h-9 px-3 shrink-0"
+          >
+            {stockAlertSuccess ? "Subscribed" : "Notify When In Stock"}
+          </Button>
+        ) : (
+          <div className="flex items-center gap-1.5 shrink-0">
+            <Button
+              onClick={() => handleAddToCart(false)}
+              disabled={isAdding}
+              variant="outline"
+              size="sm"
+              className="text-xs font-bold h-9 px-3 border-slate-300"
+            >
+              Add
+            </Button>
+            <Button
+              onClick={() => handleAddToCart(true)}
+              disabled={isAdding}
+              size="sm"
+              className="bg-indigo-600 hover:bg-indigo-700 text-white font-bold text-xs h-9 px-3.5 shadow-sm"
+            >
+              Buy Now
+            </Button>
+          </div>
+        )}
+      </div>
 
       {/* Review Submission Modal */}
       <Modal

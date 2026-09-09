@@ -68,7 +68,100 @@ export default function AdminSellersPage() {
       </div>
 
       <div className="rounded-2xl border border-slate-200 bg-white overflow-hidden shadow-sm">
-        <div className="overflow-x-auto">
+        {/* Mobile Card List (screens < md) */}
+        <div className="md:hidden divide-y divide-slate-100">
+          {sellers.map((s) => (
+            <div key={s.id} className="p-4 space-y-3">
+              <div className="flex items-center justify-between">
+                <div>
+                  <span className="font-bold text-slate-900 block text-xs">{s.storeName}</span>
+                  <span className="text-[10px] text-slate-400">Created: {formatDate(s.createdAt)}</span>
+                </div>
+                <span
+                  className={`px-2.5 py-0.5 rounded-full text-[10px] font-bold ${
+                    s.status === "APPROVED"
+                      ? "bg-emerald-100 text-emerald-800"
+                      : s.status === "PENDING"
+                      ? "bg-amber-100 text-amber-800"
+                      : "bg-red-100 text-red-800"
+                  }`}
+                >
+                  {s.status}
+                </span>
+              </div>
+
+              <div className="bg-slate-50 rounded-xl p-3 space-y-1.5 text-xs">
+                <div className="flex justify-between items-center">
+                  <span className="text-slate-500 text-[11px]">Owner:</span>
+                  <span className="text-[11px] font-mono text-slate-700 truncate max-w-[200px]">{s.user.email}</span>
+                </div>
+                <div className="flex justify-between items-center">
+                  <span className="text-slate-500 text-[11px]">Products Listed:</span>
+                  <span className="text-slate-800 font-semibold">{s._count?.products || 0}</span>
+                </div>
+                <div className="flex justify-between items-center">
+                  <span className="text-slate-500 text-[11px]">Commission:</span>
+                  <span className="text-slate-900 font-bold">{s.commissionRate}%</span>
+                </div>
+                <div className="flex justify-between items-center">
+                  <span className="text-slate-500 text-[11px]">Vendor Rating:</span>
+                  <span className="font-bold text-amber-600">⭐ {s.rating.toFixed(1)}</span>
+                </div>
+              </div>
+
+              {/* Actions */}
+              <div className="flex items-center gap-2 pt-1">
+                {s.status === "PENDING" && (
+                  <>
+                    <Button
+                      size="sm"
+                      onClick={() => handleUpdateStatus(s.id, "APPROVED")}
+                      isLoading={updatingId === s.id}
+                      className="flex-1 bg-emerald-600 hover:bg-emerald-700 text-white text-xs h-9 cursor-pointer"
+                    >
+                      Approve
+                    </Button>
+                    <Button
+                      size="sm"
+                      variant="danger"
+                      onClick={() => handleUpdateStatus(s.id, "REJECTED")}
+                      isLoading={updatingId === s.id}
+                      className="flex-1 text-xs h-9 cursor-pointer"
+                    >
+                      Reject
+                    </Button>
+                  </>
+                )}
+
+                {s.status === "APPROVED" && (
+                  <Button
+                    size="sm"
+                    variant="outline"
+                    onClick={() => handleUpdateStatus(s.id, "SUSPENDED")}
+                    isLoading={updatingId === s.id}
+                    className="w-full text-red-600 border-red-200 hover:bg-red-50 text-xs h-9 cursor-pointer"
+                  >
+                    Suspend Vendor
+                  </Button>
+                )}
+
+                {s.status === "SUSPENDED" && (
+                  <Button
+                    size="sm"
+                    onClick={() => handleUpdateStatus(s.id, "APPROVED")}
+                    isLoading={updatingId === s.id}
+                    className="w-full bg-emerald-600 hover:bg-emerald-700 text-white text-xs h-9 cursor-pointer"
+                  >
+                    Reactivate Vendor
+                  </Button>
+                )}
+              </div>
+            </div>
+          ))}
+        </div>
+
+        {/* Desktop Table View (screens >= md) */}
+        <div className="hidden md:block overflow-x-auto">
           <table className="w-full text-left text-xs">
             <thead className="bg-slate-50 border-b border-slate-200 text-slate-500 font-bold uppercase">
               <tr>

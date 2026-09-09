@@ -157,9 +157,9 @@ export default function AdminAnalyticsPage() {
 
       {/* Charts Section */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        <div className="lg:col-span-2 p-6 rounded-2xl border border-slate-200 bg-white space-y-4 shadow-sm">
+        <div className="lg:col-span-2 p-4 sm:p-6 rounded-2xl border border-slate-200 bg-white space-y-4 shadow-sm min-w-0 overflow-hidden">
           <h3 className="text-sm font-bold text-slate-900">Gross Platform Revenue Trend</h3>
-          <div className="h-64 w-full">
+          <div className="h-64 w-full min-w-0">
             <ResponsiveContainer width="100%" height="100%">
               <AreaChart data={chartData}>
                 <defs>
@@ -178,9 +178,9 @@ export default function AdminAnalyticsPage() {
           </div>
         </div>
 
-        <div className="p-6 rounded-2xl border border-slate-200 bg-white space-y-4 shadow-sm">
+        <div className="p-4 sm:p-6 rounded-2xl border border-slate-200 bg-white space-y-4 shadow-sm min-w-0 overflow-hidden">
           <h3 className="text-sm font-bold text-slate-900">Category GMV Share (%)</h3>
-          <div className="h-64 w-full">
+          <div className="h-64 w-full min-w-0">
             <ResponsiveContainer width="100%" height="100%">
               <BarChart data={categoryShare} layout="vertical">
                 <CartesianGrid strokeDasharray="3 3" horizontal={false} stroke="#f1f5f9" />

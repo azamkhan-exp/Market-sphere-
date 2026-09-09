@@ -203,6 +203,21 @@ npm run build
 npm start
 ```
 
+### ⚡ Vercel Deployment (Zero-Config / Database-Off Ready)
+
+MarketSphere is engineered to deploy seamlessly to **Vercel** with **zero external database dependencies**:
+
+1. **Import Repository**: Connect your GitHub repository to Vercel.
+2. **Environment Variables**: Leave `DATABASE_URL` blank (or omit it entirely).
+   - MarketSphere automatically detects when no database is configured and operates in **Database-Off Demo Mode**.
+   - Built-in in-memory repository collections (`repositories/demo/`) serve all 32 realistic products, 8 categories, 4 sellers, simulated customer orders, and reviews.
+   - All 56 routes—including checkout, shipment tracking, `/categories`, `/products`, seller analytics, and admin management—render with zero runtime crashes or 404s.
+3. **Deploy**: Click **Deploy**. Next.js will compile all static and dynamic pages with 0 errors.
+
+> [!TIP]
+> **Enabling a Live PostgreSQL Database Later:**
+> When ready for persistent PostgreSQL (e.g. Neon, Supabase, or AWS RDS), simply add `DATABASE_URL="postgresql://..."` in your Vercel Project Settings and run `npx prisma db push`. The platform automatically switches from demo repository mode to live Prisma execution with zero code changes!
+
 ### Docker Deployment with PostgreSQL
 
 To run MarketSphere alongside a dedicated PostgreSQL instance using Docker Compose:

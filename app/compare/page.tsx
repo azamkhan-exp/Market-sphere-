@@ -1,4 +1,4 @@
-import { db } from "@/lib/db";
+import { ProductRepository } from "@/repositories";
 import { ProductComparison } from "@/components/product/ProductComparison";
 
 export const dynamic = "force-dynamic";
@@ -14,27 +14,13 @@ export default async function ComparePage({
   let products: any[] = [];
 
   if (rawIds.length > 0) {
-    products = await db.product.findMany({
-      where: { id: { in: rawIds } },
-      include: {
-        category: true,
-        brand: true,
-        seller: { select: { storeName: true, rating: true } },
-        images: { take: 1 },
-      },
-    });
-  } else {
-    // Default demo comparison: 2-3 top featured electronics/laptops/headphones
-    products = await db.product.findMany({
-      where: { isFeatured: true },
-      include: {
-        category: true,
-        brand: true,
-        seller: { select: { storeName: true, rating: true } },
-        images: { take: 1 },
-      },
-      take: 3,
-    });
+    const all = await ProductRepository.findMany({ limit: 50 });
+    products = all.products.filter((p) => rawIds.includes(p.id));
+  }
+
+  if (products.length === 0) {
+    // Default demo comparison: top featured items
+    products = await ProductRepository.findFeatured(3);
   }
 
   return (

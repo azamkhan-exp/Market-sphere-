@@ -1,6 +1,5 @@
 import { notFound } from "next/navigation";
 import { ProductService } from "@/services/productService";
-import { db } from "@/lib/db";
 import { ProductDetailClient } from "./ProductDetailClient";
 import { Metadata } from "next";
 
@@ -35,15 +34,7 @@ export default async function ProductDetailPage({ params }: ProductPageProps) {
   }
 
   // Related products in the same category
-  const relatedProducts = await db.product.findMany({
-    where: {
-      categoryId: product.categoryId,
-      id: { not: product.id },
-      status: "ACTIVE",
-    },
-    include: { images: true, category: true },
-    take: 4,
-  });
+  const relatedProducts = await ProductService.getRelatedProducts(product.categoryId, product.id, 4);
 
   // JSON-LD Structured Data for SEO
   const jsonLd = {
@@ -63,7 +54,7 @@ export default async function ProductDetailPage({ params }: ProductPageProps) {
           : "https://schema.org/OutOfStock",
       seller: {
         "@type": "Organization",
-        name: product.seller.storeName,
+        name: product.seller?.storeName || "MarketSphere Merchant",
       },
     },
     aggregateRating: {

@@ -1,31 +1,21 @@
 import { db } from "@/lib/db";
-import { Prisma } from "@prisma/client";
+import { isDatabaseEnabled } from "@/lib/config";
+import { ProductRepository } from "@/repositories";
+import { ProductFilterParams } from "@/repositories/types";
 
-export interface ProductFilterParams {
-  query?: string;
-  category?: string;
-  brand?: string;
-  minPrice?: number;
-  maxPrice?: number;
-  minRating?: number;
-  inStockOnly?: boolean;
-  onSaleOnly?: boolean;
-  flashDealOnly?: boolean;
-  sellerId?: string;
-  sort?: "relevance" | "price-asc" | "price-desc" | "rating" | "newest" | "best-selling";
-  page?: number;
-  limit?: number;
-}
+export { type ProductFilterParams };
 
 export class ProductService {
   static async searchProducts(params: ProductFilterParams) {
+    if (!isDatabaseEnabled()) {
+      return ProductRepository.findMany(params);
+    }
+
     const page = Math.max(1, params.page || 1);
     const limit = Math.min(50, Math.max(1, params.limit || 20));
     const skip = (page - 1) * limit;
 
-    const where: Prisma.ProductWhereInput = {
-      status: "ACTIVE",
-    };
+    const where: any = { status: "ACTIVE" };
 
     if (params.query) {
       const q = params.query.trim();
@@ -76,58 +66,69 @@ export class ProductService {
       where.isFlashDeal = true;
     }
 
-    // Sorting
-    let orderBy: Prisma.ProductOrderByWithRelationInput = { createdAt: "desc" };
+    let orderBy: any = [{ createdAt: "desc" }];
     switch (params.sort) {
       case "price-asc":
-        orderBy = { salePrice: "asc" };
+        orderBy = [{ salePrice: "asc" }, { basePrice: "asc" }];
         break;
       case "price-desc":
-        orderBy = { salePrice: "desc" };
+        orderBy = [{ salePrice: "desc" }, { basePrice: "desc" }];
         break;
       case "rating":
-        orderBy = { avgRating: "desc" };
+        orderBy = [{ avgRating: "desc" }];
         break;
       case "best-selling":
-        orderBy = { totalSales: "desc" };
+        orderBy = [{ totalSales: "desc" }];
         break;
       case "newest":
-        orderBy = { createdAt: "desc" };
+        orderBy = [{ createdAt: "desc" }];
         break;
-      case "relevance":
       default:
-        orderBy = { totalSales: "desc" };
+        orderBy = [{ totalSales: "desc" }, { avgRating: "desc" }];
         break;
     }
 
     const [products, total] = await Promise.all([
       db.product.findMany({
         where,
-        include: {
-          category: true,
-          brand: true,
-          seller: { select: { id: true, storeName: true, rating: true } },
-          images: { orderBy: { sortOrder: "asc" } },
-        },
         orderBy,
         skip,
         take: limit,
+        include: {
+          category: { select: { id: true, name: true, slug: true } },
+          brand: { select: { id: true, name: true, slug: true } },
+          seller: { select: { id: true, storeName: true, slug: true, rating: true } },
+          images: { orderBy: { isPrimary: "desc" } },
+        },
       }),
       db.product.count({ where }),
     ]);
 
+    const totalPages = Math.ceil(total / limit);
+    const pagination = {
+      total,
+      page,
+      limit,
+      totalPages,
+      hasMore: page < totalPages,
+    };
+
     return {
       products,
-      pagination: {
-        page,
-        limit,
-        total,
-        totalPages: Math.ceil(total / limit),
-      },
+      total,
+      page,
+      limit,
+      totalPages,
+      hasMore: page < totalPages,
+      pagination,
     };
   }
 
   static async getProductBySlug(slug: string) {
+    if (!isDatabaseEnabled()) {
+      return ProductRepository.findBySlug(slug);
+    }
+
     return db.product.findUnique({
       where: { slug },
       include: {
@@ -138,52 +139,129 @@ export class ProductService {
             id: true,
             storeName: true,
             slug: true,
+            logo: true,
             rating: true,
             reviewCount: true,
-            logo: true,
-            description: true,
           },
         },
-        images: { orderBy: { sortOrder: "asc" } },
+        images: { orderBy: { isPrimary: "desc" } },
         variants: true,
-        priceHistories: { orderBy: { createdAt: "desc" }, take: 1 },
+        attributes: true,
         reviews: {
+          take: 10,
+          orderBy: { createdAt: "desc" },
           include: {
             user: { select: { id: true, name: true, avatar: true } },
-            images: true,
           },
-          orderBy: { createdAt: "desc" },
         },
       },
     });
   }
 
-  static async getFeaturedAndDeals() {
-    const [flashDeals, bestSellers, newArrivals, categories] = await Promise.all([
-      db.product.findMany({
-        where: { status: "ACTIVE", isFlashDeal: true },
-        include: { category: true, brand: true, images: true },
-        take: 6,
-      }),
-      db.product.findMany({
-        where: { status: "ACTIVE" },
-        include: { category: true, brand: true, images: true },
-        orderBy: { totalSales: "desc" },
-        take: 8,
-      }),
-      db.product.findMany({
-        where: { status: "ACTIVE" },
-        include: { category: true, brand: true, images: true },
-        orderBy: { createdAt: "desc" },
-        take: 8,
-      }),
-      db.category.findMany({
-        where: { isFeatured: true },
-        include: { _count: { select: { products: true } } },
-        take: 8,
-      }),
-    ]);
+  static async getProductById(id: string) {
+    if (!isDatabaseEnabled()) {
+      return ProductRepository.findById(id);
+    }
 
-    return { flashDeals, bestSellers, newArrivals, categories };
+    return db.product.findUnique({
+      where: { id },
+      include: {
+        category: true,
+        brand: true,
+        seller: true,
+        images: true,
+        variants: true,
+        attributes: true,
+      },
+    });
+  }
+
+  static async getFeaturedProducts(limit = 8) {
+    if (!isDatabaseEnabled()) {
+      return ProductRepository.findFeatured(limit);
+    }
+
+    return db.product.findMany({
+      where: { status: "ACTIVE", isFeatured: true },
+      take: limit,
+      include: {
+        category: true,
+        brand: true,
+        images: { where: { isPrimary: true }, take: 1 },
+      },
+      orderBy: { totalSales: "desc" },
+    });
+  }
+
+  static async getFlashDeals(limit = 4) {
+    if (!isDatabaseEnabled()) {
+      return ProductRepository.findFlashDeals(limit);
+    }
+
+    return db.product.findMany({
+      where: { status: "ACTIVE", isFlashDeal: true },
+      take: limit,
+      include: {
+        category: true,
+        brand: true,
+        images: { where: { isPrimary: true }, take: 1 },
+      },
+      orderBy: { createdAt: "desc" },
+    });
+  }
+
+  static async getBestSellers(limit = 8) {
+    if (!isDatabaseEnabled()) {
+      return ProductRepository.findBestSellers(limit);
+    }
+
+    return db.product.findMany({
+      where: { status: "ACTIVE" },
+      take: limit,
+      include: {
+        category: true,
+        brand: true,
+        images: { where: { isPrimary: true }, take: 1 },
+      },
+      orderBy: { totalSales: "desc" },
+    });
+  }
+
+  static async getNewArrivals(limit = 8) {
+    if (!isDatabaseEnabled()) {
+      return ProductRepository.findNewArrivals(limit);
+    }
+
+    return db.product.findMany({
+      where: { status: "ACTIVE" },
+      take: limit,
+      include: {
+        category: true,
+        brand: true,
+        images: { where: { isPrimary: true }, take: 1 },
+      },
+      orderBy: { createdAt: "desc" },
+    });
+  }
+
+  static async getRelatedProducts(categoryId: string, excludeProductId: string, limit = 4) {
+    if (!isDatabaseEnabled()) {
+      return ProductRepository.findRelated(categoryId, excludeProductId, limit);
+    }
+
+    return db.product.findMany({
+      where: {
+        categoryId,
+        id: { not: excludeProductId },
+        status: "ACTIVE",
+      },
+      take: limit,
+      include: {
+        category: true,
+        brand: true,
+        images: { where: { isPrimary: true }, take: 1 },
+      },
+      orderBy: { totalSales: "desc" },
+    });
   }
 }

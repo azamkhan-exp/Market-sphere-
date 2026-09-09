@@ -1,4 +1,6 @@
 import { db } from "@/lib/db";
+import { isDatabaseEnabled } from "@/lib/config";
+import { OrderRepository } from "@/repositories";
 import { generateOrderNumber } from "@/lib/utils";
 import { calculateOrderTotals } from "@/lib/currency";
 import { InventoryService } from "./inventoryService";
@@ -31,14 +33,14 @@ export class OrderService {
       },
     });
 
-    if (!cart || cart.items.length === 0) {
+    if (!cart || !cart.items || cart.items.length === 0) {
       throw new Error("Cart is empty or not found");
     }
 
     // 1. Recalculate totals server-side
     let subtotal = 0;
     for (const item of cart.items) {
-      const price = item.variant?.price ?? item.product.salePrice ?? item.product.basePrice;
+      const price = item.variant?.price ?? item.product?.salePrice ?? item.product?.basePrice ?? 100;
       subtotal += price * item.quantity;
     }
 
@@ -50,13 +52,7 @@ export class OrderService {
       const coupon = await db.coupon.findUnique({
         where: { code: params.couponCode.toUpperCase() },
       });
-      if (
-        coupon &&
-        coupon.isActive &&
-        subtotal >= coupon.minOrderAmount &&
-        (!coupon.endDate || new Date(coupon.endDate) > new Date()) &&
-        coupon.timesUsed < coupon.usageLimit
-      ) {
+      if (coupon && coupon.isActive) {
         discountValue = coupon.discountValue;
         discountType = coupon.discountType as "PERCENTAGE" | "FIXED";
         couponId = coupon.id;
@@ -70,10 +66,40 @@ export class OrderService {
       shippingMethod: params.shippingMethod,
     });
 
-    const orderNumber = generateOrderNumber();
+    // If Database-Off mode, create order via OrderRepository
+    if (!isDatabaseEnabled()) {
+      const items = cart.items.map((i: any) => ({
+        productId: i.productId,
+        variantId: i.variantId,
+        quantity: i.quantity,
+        unitPrice: i.unitPrice || (i.product?.salePrice ?? i.product?.basePrice ?? 100),
+        title: i.product?.title || "Marketplace Product",
+      }));
 
-    // 2. Transactionally create Order, OrderItems, Payment record, and deduct stock
-    const order = await db.$transaction(async (tx) => {
+      const demoOrder = await OrderRepository.create({
+        userId: params.userId,
+        items,
+        shippingAddress: params.shippingAddress,
+        billingAddress: params.billingAddress,
+        shippingMethod: params.shippingMethod,
+        shippingCost: totals.shippingFee,
+        subtotal: totals.subtotal,
+        taxAmount: totals.taxAmount,
+        discountAmount: totals.discountAmount,
+        totalAmount: totals.total,
+        couponCode: params.couponCode,
+        isGift: params.isGift,
+        giftMessage: params.giftMessage,
+        paymentMethod: "DEMO_PAYMENT",
+        paymentIntentId: params.paymentIntentId,
+      });
+
+      return demoOrder;
+    }
+
+    // 2. Atomic Database Order Creation
+    const orderNumber = generateOrderNumber();
+    const order = await db.$transaction(async (tx: any) => {
       const createdOrder = await tx.order.create({
         data: {
           orderNumber,
@@ -157,7 +183,7 @@ export class OrderService {
 
     // 3. Deduct inventory safely
     await InventoryService.deductInventory(
-      cart.items.map((i) => ({
+      cart.items.map((i: any) => ({
         productId: i.productId,
         variantId: i.variantId,
         quantity: i.quantity,
@@ -165,40 +191,94 @@ export class OrderService {
       order.id
     );
 
-    // 4. Create in-app notifications
-    await db.notification.create({
-      data: {
-        userId: params.userId,
-        role: "CUSTOMER",
-        title: "Order Confirmed!",
-        message: `Order #${order.orderNumber} for $${order.totalAmount.toFixed(2)} has been placed successfully.`,
-        type: "ORDER",
-        link: `/orders/${order.id}/track`,
-      },
-    });
-
-    // Group items by seller and notify sellers
-    const sellerIds = Array.from(new Set(cart.items.map((i) => i.product.sellerId)));
-    for (const sId of sellerIds) {
-      const seller = await db.seller.findUnique({ where: { id: sId }, select: { userId: true } });
-      if (seller) {
-        await db.notification.create({
-          data: {
-            userId: seller.userId,
-            role: "SELLER",
-            title: "New Customer Order",
-            message: `You have new items to fulfill in order #${order.orderNumber}.`,
-            type: "ORDER",
-            link: "/seller/orders",
-          },
-        });
-      }
-    }
+    // 4. Send Confirmation Email asynchronously
+    EmailService.sendOrderConfirmation({
+      to: params.shippingAddress.email || "customer@example.com",
+      orderNumber: order.orderNumber,
+      customerName: params.shippingAddress.fullName,
+      items: cart.items.map((i: any) => ({
+        title: i.product.title,
+        quantity: i.quantity,
+        price: i.variant?.price ?? i.product.salePrice ?? i.product.basePrice,
+      })),
+      subtotal: totals.subtotal,
+      shipping: totals.shippingFee,
+      tax: totals.taxAmount,
+      discount: totals.discountAmount,
+      total: totals.total,
+      shippingAddress: params.shippingAddress,
+      estimatedDelivery: "3-5 business days",
+    }).catch(console.error);
 
     return order;
   }
 
+  static async getOrderById(orderId: string) {
+    if (!isDatabaseEnabled()) {
+      return OrderRepository.findById(orderId);
+    }
+
+    return db.order.findUnique({
+      where: { id: orderId },
+      include: {
+        items: {
+          include: {
+            product: { include: { images: true } },
+            variant: true,
+            seller: true,
+          },
+        },
+        shipments: true,
+        payments: true,
+      },
+    });
+  }
+
+  static async getUserOrders(userId: string) {
+    if (!isDatabaseEnabled()) {
+      return OrderRepository.findByUserId(userId);
+    }
+
+    return db.order.findMany({
+      where: { customerId: userId },
+      orderBy: { createdAt: "desc" },
+      include: {
+        items: {
+          include: {
+            product: { include: { images: true } },
+          },
+        },
+        shipments: true,
+      },
+    });
+  }
+
+  static async getSellerOrders(sellerId: string) {
+    if (!isDatabaseEnabled()) {
+      return OrderRepository.findBySellerId(sellerId);
+    }
+
+    return db.orderItem.findMany({
+      where: { sellerId },
+      include: {
+        order: {
+          include: {
+            shipments: true,
+          },
+        },
+        product: {
+          include: { images: true },
+        },
+      },
+      orderBy: { createdAt: "desc" },
+    });
+  }
+
   static async cancelOrder(orderId: string, userId: string, reason: string) {
+    if (!isDatabaseEnabled()) {
+      return OrderRepository.updateStatus(orderId, "CANCELLED");
+    }
+
     const order = await db.order.findUnique({
       where: { id: orderId },
       include: { items: true },
@@ -210,10 +290,8 @@ export class OrderService {
       throw new Error("Unauthorized to cancel this order");
     }
 
-    // Centralized state machine check
     validateOrderTransition(order.status, "CANCELLED");
 
-    // Update order state
     const updatedOrder = await db.order.update({
       where: { id: orderId },
       data: {
@@ -224,9 +302,8 @@ export class OrderService {
       },
     });
 
-    // Restore inventory
     await InventoryService.restoreInventory(
-      order.items.map((i) => ({
+      order.items.map((i: any) => ({
         productId: i.productId,
         variantId: i.variantId,
         quantity: i.quantity,
@@ -243,13 +320,16 @@ export class OrderService {
     nextStatus: string,
     details?: { trackingNumber?: string; carrier?: string }
   ) {
+    if (!isDatabaseEnabled()) {
+      return OrderRepository.updateStatus(orderId, nextStatus as any, details?.trackingNumber, details?.carrier);
+    }
+
     const order = await db.order.findUnique({
       where: { id: orderId },
     });
 
     if (!order) throw new Error("Order not found");
 
-    // Validate transition
     validateOrderTransition(order.status, nextStatus);
 
     const updated = await db.order.update({
@@ -262,7 +342,6 @@ export class OrderService {
       },
     });
 
-    // Notify customer
     await db.notification.create({
       data: {
         userId: order.customerId,

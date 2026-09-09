@@ -1,6 +1,7 @@
 import { notFound } from "next/navigation";
 import Link from "next/link";
 import { ProductImage } from "@/components/ui/ProductImage";
+import { OrderRepository } from "@/repositories";
 import { db } from "@/lib/db";
 import { CheckCircle2, Package, Truck, ArrowRight } from "lucide-react";
 import { formatPrice, formatDate } from "@/lib/utils";
@@ -14,29 +15,44 @@ export default async function OrderConfirmationPage({
 }) {
   const { orderId } = await params;
 
-  const order = await db.order.findFirst({
-    where: {
-      OR: [{ id: orderId }, { orderNumber: orderId }],
-    },
-    include: {
-      items: {
-        include: {
-          product: { include: { images: { take: 1 } } },
-          seller: true,
+  let order: any = await OrderRepository.findById(orderId);
+  if (!order) {
+    order = await db.order.findFirst({
+      where: {
+        OR: [{ id: orderId }, { orderNumber: orderId }],
+      },
+      include: {
+        items: {
+          include: {
+            product: { include: { images: { take: 1 } } },
+            seller: true,
+          },
         },
       },
-    },
-  });
+    });
+  }
 
   if (!order) notFound();
 
   let address: any = {};
-  try {
-    address = JSON.parse(order.shippingAddressJson);
-  } catch (e) {}
+  if (typeof order.shippingAddress === "object" && order.shippingAddress) {
+    address = order.shippingAddress;
+  } else if (order.shippingAddressJson) {
+    try {
+      address = JSON.parse(order.shippingAddressJson);
+    } catch (e) {
+      address = {};
+    }
+  }
+
+  const subtotal = order.subtotal ?? 0;
+  const shippingCost = order.shippingCost ?? order.shippingFee ?? 0;
+  const taxAmount = order.taxAmount ?? 0;
+  const discountAmount = order.discountAmount ?? 0;
+  const totalAmount = order.totalAmount ?? order.total ?? (subtotal + shippingCost + taxAmount - discountAmount);
 
   return (
-    <div className="max-w-3xl mx-auto py-10 space-y-8 text-center sm:text-left">
+    <div className="max-w-3xl mx-auto py-10 space-y-8 text-center sm:text-left px-4">
       {/* Success Banner */}
       <div className="p-8 rounded-3xl bg-gradient-to-r from-emerald-500/10 via-teal-500/10 to-indigo-500/10 border border-emerald-200 text-center space-y-3">
         <div className="w-16 h-16 rounded-full bg-emerald-600 text-white flex items-center justify-center mx-auto shadow-lg shadow-emerald-600/30">
@@ -68,12 +84,14 @@ export default async function OrderConfirmationPage({
           </div>
           <div>
             <span className="text-slate-400">Carrier:</span>
-            <p className="font-bold text-slate-900">{order.carrier || "MarketSphere Express"}</p>
+            <p className="font-bold text-slate-900">
+              {order.shipment?.carrier || order.carrier || "MarketSphere Express"}
+            </p>
           </div>
           <div>
             <span className="text-slate-400">Estimated Delivery:</span>
             <p className="font-bold text-indigo-600">
-              {order.estimatedDelivery ? formatDate(order.estimatedDelivery) : "3-5 Business Days"}
+              {order.shipment?.estimatedDelivery || (order.estimatedDelivery ? formatDate(order.estimatedDelivery) : "3-5 Business Days")}
             </p>
           </div>
         </div>
@@ -82,12 +100,12 @@ export default async function OrderConfirmationPage({
         <div className="space-y-4">
           <h3 className="text-sm font-bold text-slate-900">Ordered Items</h3>
           <div className="divide-y divide-slate-100">
-            {order.items.map((item) => (
+            {order.items?.map((item: any) => (
               <div key={item.id} className="py-3 flex items-center justify-between text-xs">
                 <div className="flex items-center gap-3">
                   <div className="relative w-12 h-12 rounded-lg overflow-hidden bg-slate-50 border border-slate-200 shrink-0">
                     <ProductImage
-                      src={item.product.images?.[0]?.url}
+                      src={item.product?.images?.[0]?.url || item.productImage}
                       alt={item.title}
                       fill
                     />
@@ -95,63 +113,76 @@ export default async function OrderConfirmationPage({
                   <div>
                     <h4 className="font-bold text-slate-900">{item.title}</h4>
                     <p className="text-[11px] text-slate-500">
-                      Seller: {item.seller.storeName} | Qty: {item.quantity}
+                      Seller: {item.seller?.storeName || "Verified Merchant"} | Qty: {item.quantity}
                     </p>
                   </div>
                 </div>
-                <span className="font-extrabold text-slate-900">{formatPrice(item.subtotal)}</span>
+                <div className="text-right">
+                  <span className="font-bold text-slate-900">
+                    {formatPrice(item.subtotal || item.unitPrice * item.quantity)}
+                  </span>
+                  <p className="text-[10px] text-slate-400">
+                    {formatPrice(item.unitPrice)} each
+                  </p>
+                </div>
               </div>
             ))}
           </div>
         </div>
 
-        {/* Totals Breakdown */}
-        <div className="pt-4 border-t border-slate-100 text-xs space-y-1.5 max-w-xs ml-auto">
+        {/* Pricing Summary */}
+        <div className="border-t border-slate-100 pt-4 space-y-2 text-xs">
           <div className="flex justify-between text-slate-600">
-            <span>Subtotal:</span>
-            <span className="font-bold text-slate-900">{formatPrice(order.subtotal)}</span>
+            <span>Subtotal</span>
+            <span>{formatPrice(subtotal)}</span>
           </div>
-          {order.discountAmount > 0 && (
-            <div className="flex justify-between text-emerald-600 font-bold">
-              <span>Discount ({order.couponCode}):</span>
-              <span>-{formatPrice(order.discountAmount)}</span>
+          {discountAmount > 0 && (
+            <div className="flex justify-between text-emerald-600 font-semibold">
+              <span>Discount</span>
+              <span>-{formatPrice(discountAmount)}</span>
             </div>
           )}
           <div className="flex justify-between text-slate-600">
-            <span>Shipping:</span>
-            <span className="font-bold text-slate-900">
-              {order.shippingFee === 0 ? "FREE" : formatPrice(order.shippingFee)}
-            </span>
+            <span>Shipping</span>
+            <span>{shippingCost === 0 ? "FREE" : formatPrice(shippingCost)}</span>
           </div>
           <div className="flex justify-between text-slate-600">
-            <span>Tax:</span>
-            <span className="font-bold text-slate-900">{formatPrice(order.taxAmount)}</span>
+            <span>Estimated Tax</span>
+            <span>{formatPrice(taxAmount)}</span>
           </div>
-          <div className="flex justify-between text-sm font-black text-slate-900 pt-2 border-t border-slate-200">
-            <span>Total Paid:</span>
-            <span className="text-indigo-600">{formatPrice(order.totalAmount)}</span>
+          <div className="flex justify-between border-t border-slate-200 pt-2 text-sm font-bold text-slate-900">
+            <span>Total Paid</span>
+            <span className="text-indigo-600">{formatPrice(totalAmount)}</span>
           </div>
         </div>
 
         {/* Shipping Address */}
-        <div className="pt-4 border-t border-slate-100 text-xs text-slate-600">
-          <p className="font-bold text-slate-900 mb-1">Delivering to:</p>
-          <p>{address.fullName}</p>
-          <p>{address.street}{address.apartment ? `, ${address.apartment}` : ""}</p>
-          <p>{address.city}, {address.state} {address.postalCode}</p>
-        </div>
+        {address && address.fullName && (
+          <div className="border-t border-slate-100 pt-4 text-xs">
+            <span className="font-bold text-slate-900 block mb-1">Shipping Destination:</span>
+            <p className="text-slate-600 leading-relaxed">
+              {address.fullName}<br />
+              {address.street} {address.apartment && `, ${address.apartment}`}<br />
+              {address.city}, {address.state} {address.postalCode}<br />
+              {address.country}
+            </p>
+          </div>
+        )}
       </div>
 
-      {/* Action Links */}
-      <div className="flex flex-col sm:flex-row gap-4 justify-between items-center text-xs">
-        <Link href="/" className="text-indigo-600 font-semibold hover:underline">
-          &larr; Return to Marketplace Home
-        </Link>
+      {/* Action Buttons */}
+      <div className="flex flex-col sm:flex-row items-center justify-between gap-4 pt-4">
         <Link
           href={`/orders/${order.id}/track`}
-          className="px-5 py-2.5 rounded-xl bg-slate-900 text-white font-bold hover:bg-indigo-600 transition-colors flex items-center gap-1.5"
+          className="w-full sm:w-auto inline-flex items-center justify-center gap-2 px-6 py-3 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-bold shadow-sm transition-all"
         >
-          <Truck className="w-4 h-4" /> Live Tracking Timeline <ArrowRight className="w-3.5 h-3.5" />
+          <Truck className="w-4 h-4" /> Track Shipment
+        </Link>
+        <Link
+          href="/search"
+          className="w-full sm:w-auto inline-flex items-center justify-center gap-2 px-6 py-3 rounded-xl border border-slate-200 hover:bg-slate-50 text-slate-700 text-xs font-bold transition-all"
+        >
+          Continue Shopping <ArrowRight className="w-4 h-4" />
         </Link>
       </div>
     </div>

@@ -16,6 +16,20 @@ export class EmailService {
     };
   }
 
+  static async sendOrderConfirmation(params: any): Promise<any> {
+    const html = this.getOrderConfirmationHtml({
+      orderNumber: params.orderNumber,
+      customerName: params.customerName,
+      totalAmount: params.total ?? params.totalAmount ?? 0,
+      itemsSummary: params.items?.map((i: any) => `${i.quantity}x ${i.title}`).join(", ") || "Ordered items",
+    });
+    return this.send({
+      to: params.to,
+      subject: `Order Confirmation #${params.orderNumber} | MarketSphere`,
+      html,
+    });
+  }
+
   private static wrapper(content: string): string {
     return `
       <!DOCTYPE html>

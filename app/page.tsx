@@ -1,4 +1,5 @@
-import { db } from "@/lib/db";
+import { CategoryRepository } from "@/repositories";
+import { ProductService } from "@/services/productService";
 import { HeroBanner } from "@/components/storefront/HeroBanner";
 import { CategoryGrid } from "@/components/storefront/CategoryGrid";
 import { FlashDealsSection } from "@/components/storefront/FlashDealsSection";
@@ -10,28 +11,10 @@ export const dynamic = "force-dynamic";
 
 export default async function HomePage() {
   const [categories, flashDeals, bestSellers, newArrivals] = await Promise.all([
-    db.category.findMany({
-      where: { isFeatured: true },
-      include: { _count: { select: { products: true } } },
-      take: 8,
-    }),
-    db.product.findMany({
-      where: { status: "ACTIVE", isFlashDeal: true },
-      include: { category: true, brand: true, images: true },
-      take: 4,
-    }),
-    db.product.findMany({
-      where: { status: "ACTIVE" },
-      include: { category: true, brand: true, images: true },
-      orderBy: { totalSales: "desc" },
-      take: 8,
-    }),
-    db.product.findMany({
-      where: { status: "ACTIVE" },
-      include: { category: true, brand: true, images: true },
-      orderBy: { createdAt: "desc" },
-      take: 8,
-    }),
+    CategoryRepository.getFeatured(8),
+    ProductService.getFlashDeals(4),
+    ProductService.getBestSellers(8),
+    ProductService.getNewArrivals(8),
   ]);
 
   return (

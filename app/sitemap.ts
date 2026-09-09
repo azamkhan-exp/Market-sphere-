@@ -1,5 +1,5 @@
 import { MetadataRoute } from "next";
-import { db } from "@/lib/db";
+import { ProductRepository, CategoryRepository } from "@/repositories";
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const baseUrl = process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000";
@@ -19,6 +19,12 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
       priority: 0.9,
     },
     {
+      url: `${baseUrl}/categories`,
+      lastModified: new Date(),
+      changeFrequency: "weekly",
+      priority: 0.8,
+    },
+    {
       url: `${baseUrl}/compare`,
       lastModified: new Date(),
       changeFrequency: "weekly",
@@ -28,26 +34,19 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
 
   try {
     // Dynamic Products
-    const products = await db.product.findMany({
-      where: { status: "ACTIVE" },
-      select: { slug: true, updatedAt: true },
-    });
-
-    const productRoutes: MetadataRoute.Sitemap = products.map((p) => ({
+    const productsResult = await ProductRepository.findMany({ limit: 50 });
+    const productRoutes: MetadataRoute.Sitemap = productsResult.products.map((p) => ({
       url: `${baseUrl}/products/${p.slug}`,
-      lastModified: p.updatedAt,
+      lastModified: new Date(),
       changeFrequency: "weekly",
       priority: 0.8,
     }));
 
     // Dynamic Categories
-    const categories = await db.category.findMany({
-      select: { slug: true, updatedAt: true },
-    });
-
+    const categories = await CategoryRepository.getAll();
     const categoryRoutes: MetadataRoute.Sitemap = categories.map((c) => ({
       url: `${baseUrl}/search?category=${c.slug}`,
-      lastModified: c.updatedAt,
+      lastModified: new Date(),
       changeFrequency: "weekly",
       priority: 0.8,
     }));
